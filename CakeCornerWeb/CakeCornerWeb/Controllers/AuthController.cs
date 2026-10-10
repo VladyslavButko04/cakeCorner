@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace CakecornerWebsite.Controllers
+namespace CakeCornerWeb.Controllers
 {
     public class AuthController : Controller
     {

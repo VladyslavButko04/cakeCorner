@@ -1,7 +1,7 @@
-﻿namespace CakecornerWebsite.Controllers;
+﻿namespace CakeCornerWeb.Controllers;
 
-using CakecornerWebsite.Interfaces;
-using CakecornerWebsite.Models.ViewModels;
+using CakeCornerWeb.Interfaces;
+using CakeCornerWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 

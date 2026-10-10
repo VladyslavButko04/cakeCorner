@@ -1,4 +1,4 @@
-﻿using CakeCornerWeb.Models.ViewModels;
+﻿using CakeCornerWeb.Models;
 using CakeCornerWeb.Models.Entities;
 
 

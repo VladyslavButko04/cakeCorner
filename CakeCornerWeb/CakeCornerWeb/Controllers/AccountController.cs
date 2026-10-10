@@ -1,6 +1,6 @@
-﻿using CakecornerWebsite.Interfaces;
+﻿using CakeCornerWeb.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using CakecornerWebsite.Models.Entities;
+using CakeCornerWeb.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 

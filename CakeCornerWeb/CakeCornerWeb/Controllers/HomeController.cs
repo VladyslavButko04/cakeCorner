@@ -1,4 +1,4 @@
-using CakecornerWebsite.Interfaces;
+using CakeCornerWeb.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 public class HomeController : Controller

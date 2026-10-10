@@ -504,5 +504,4 @@ _[Ss]cripts
 *.ncrunchsolution
 *.dot[Cc]over
 
-appsettings.Development.json
-appsettings.*.Local.json
+**/appsettings*.json

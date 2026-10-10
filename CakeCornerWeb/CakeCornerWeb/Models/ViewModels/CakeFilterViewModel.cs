@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace CakecornerWebsite.Models.ViewModels
+namespace CakeCornerWeb.Models
 {
     public class CakeFilterViewModel
     {

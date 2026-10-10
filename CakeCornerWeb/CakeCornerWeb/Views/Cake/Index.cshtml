@@ -1,8 +1,9 @@
-﻿@model List<CakecornerWebsite.Models.Entities.Cake>
-
+﻿@using CakeCornerWeb.Models
+@model List<CakeCornerWeb.Models.Entities.Cake>
+    
 @{
     ViewData["Title"] = "Список тортів";
-    var filterModel = ViewBag.FilterModel as CakecornerWebsite.Models.ViewModels.CakeFilterViewModel;
+    var filterModel = ViewBag.FilterModel as CakeCornerWeb.Models.CakeFilterViewModel;
 }
 
 @section Styles {

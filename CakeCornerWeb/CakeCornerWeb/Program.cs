@@ -1,9 +1,7 @@
 using CakeCornerWeb.Interfaces;
 using CakeCornerWeb.Services.Security;
-using CakecornerWebsite.Extensions;
-using CakecornerWebsite.Interfaces;
-using CakecornerWebsite.Services;
-using CakecornerWebsite.Services.Security;
+using CakeCornerWeb.Extensions;
+using CakeCornerWeb.Services;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -20,7 +18,7 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
