@@ -1,0 +1,28 @@
+﻿@model CakecornerWebsite.Models.Entities.Person
+
+@{
+    ViewData["Title"] = "Особистий кабінет";
+}
+
+<div class="container">
+    <h2 class="mb-4">Особистий кабінет</h2>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Ваші дані</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Ім'я</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+                <dt class="col-sm-3">Електронна пошта</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+
+                <dt class="col-sm-3">Телефон</dt>
+                <dd class="col-sm-9">@(Model.Phone ?? "Не вказано")</dd>
+            </dl>
+            <a href="#" class="btn btn-outline-primary">Редагувати профіль (заглушка)</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<link rel="stylesheet" href="~/css/home.css" />
+
+@{
+    var userName = HttpContextAccessor.HttpContext?.User.Identity?.Name;
+    var isAuthenticated = HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
+    var role = User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+}
+
+@if (isAuthenticated)
+{
+    <div class="welcome-text">
+        <span>Вітаємо в нашій авторській кондитерській, @userName!</span>
+        <span>Використовуючи навбар, перейдіть до <a href="/Cake/Index">каталогу</a> готових рішень</span>
+        <span>Role: @role</span>
+    </div>
+}
+else
+{
+    <div class="welcome-text">
+        <span>Вітаємо в нашій авторській кондитерській!</span>
+        <span>Використовуючи навбар, перейдіть до <a href="/Cake/Index">каталогу</a> готових рішень</span>
+    </div>
+}

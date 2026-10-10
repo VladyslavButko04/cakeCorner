@@ -1,0 +1,104 @@
+﻿@model List<CakecornerWebsite.Models.Entities.Cake>
+
+@{
+    ViewData["Title"] = "Список тортів";
+    var filterModel = ViewBag.FilterModel as CakecornerWebsite.Models.ViewModels.CakeFilterViewModel;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cakes.css" />
+}
+
+<h2 class="mb-4">🍰 Наші торти</h2>
+
+<form method="get" class="mb-4" id="filterForm">
+    <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+            <select name="categoryId" class="form-select" onchange="submitForm()">
+                @foreach (var item in filterModel.Categories)
+                {
+                    <option value="@item.Value" selected="@(item.Value == filterModel.CategoryId?.ToString())">
+                        @item.Text
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select name="flavorId" class="form-select" onchange="submitForm()">
+                @foreach (var item in filterModel.Flavors)
+                {
+                    <option value="@item.Value" selected="@(item.Value == filterModel.FlavorId?.ToString())">
+                        @item.Text
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <a href="@Url.Action("Index", "Cake")" class="btn btn-outline-danger" id="resetFiltersBtn">
+                🚫 Прибрати фільтри
+            </a>
+        </div>
+    </div>
+</form>
+
+@if (Model.Any())
+{
+    <div class="row">
+        @foreach (var cake in Model)
+        {
+            var hasWeights = cake.CakeWeights != null && cake.CakeWeights.Any();
+            var minWeight = hasWeights ? cake.CakeWeights.Min(w => w.WeightOption.Weight) : 0;
+            var minPrice = hasWeights ? cake.CakeWeights.Min(w => w.Price) : 0;
+
+            <div class="col-md-4 mb-4">
+                <div class="custom-cake-card">
+                    <img src="@cake.ImagePath" alt="@cake.CakeName" class="cake-image img-fluid" />
+                    <h5 class="cake-title">@cake.CakeName</h5>
+                    <p class="cake-desc">@cake.DescriptionShort</p>
+                    @if (hasWeights)
+                    {
+                        <p class="cake-weight-price">
+                            <span>@minWeight.ToString("0.00") кг</span>
+                            <span>@minPrice.ToString("0.00") грн</span>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="cake-weight-price text-warning">Ціна не вказана</p>
+                    }
+
+                    <a asp-controller="Cake" asp-action="Details" asp-route-id="@cake.Cake_ID" class="cake-btn">
+                        Переглянути
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-warning mt-4 text-center" role="alert">
+        🧐 Нажаль, тортів за заданими фільтрами не знайдено.
+    </div>
+}
+
+@section Scripts {
+    <script>
+        window.onload = function () {
+            const categoryId = "@filterModel.CategoryId";
+            const flavorId = "@filterModel.FlavorId";
+
+            const resetBtn = document.getElementById("resetFiltersBtn");
+
+            if (categoryId || flavorId) {
+                resetBtn.style.display = "inline-block";
+            } else {
+                resetBtn.style.display = "none";
+            }
+        };
+
+        function submitForm() {
+            document.getElementById("filterForm").submit();
+        }
+    </script>
+}
