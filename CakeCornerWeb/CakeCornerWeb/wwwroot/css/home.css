@@ -1,0 +1,22 @@
+﻿.welcome-text {
+    background-color: #FFF4E6;
+    border-left: 6px solid #D2691E;
+    padding: 20px 25px;
+    margin: 30px 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #5C4033;
+}
+
+    .welcome-text span {
+        display: block;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+        .welcome-text span:first-child {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #8B4513;
+        }
