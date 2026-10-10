@@ -505,3 +505,4 @@ _[Ss]cripts
 *.dot[Cc]over
 
 **/appsettings*.json
+CakeCornerWeb/CakeCornerWeb/appsettings.Development.json
