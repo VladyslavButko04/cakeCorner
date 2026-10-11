@@ -12,14 +12,14 @@
             <h1>@Model.CakeName</h1>
             <p>@Model.DescriptionLong</p>
 
-            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+            <form asp-controller="Cart" asp-action="Add" method="post">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
                     <div class="weight-select-wrapper">
                         <label class="form-label">Вага:</label>
-                        <select name="selectedWeight" id="weightSelect" class="form-select form-select-sm" onchange="updatePrice()">
+                        <select name="cakeWeightId" id="weightSelect" class="form-select form-select-sm" onchange="updatePrice()">
                             @foreach (var weight in Model.Weights)
                             {
-                                <option value="@weight.Weight" data-price="@weight.Price">@weight.Weight кг</option>
+                                <option value="@weight.CakeWeightId" data-price="@weight.Price">@weight.Weight кг</option>
                             }
                         </select>
                     </div>
@@ -43,7 +43,6 @@
                     </div>
 
                     <div class="d-flex align-items-end gap-2">
-                        <input type="hidden" name="cakeId" value="@Model.CakeId" />
                         <button type="submit" class="btn btn-primary">Додати до кошика</button>
                     </div>
                 </div>

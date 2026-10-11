@@ -9,6 +9,7 @@
 
     public class WeightPrice
     {
+        public int CakeWeightId { get; set; }
         public decimal Weight { get; set; }
         public decimal Price { get; set; }
     }

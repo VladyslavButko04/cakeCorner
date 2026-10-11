@@ -64,6 +64,7 @@ public class CakeController : Controller
             ImagePath = cake.ImagePath,
             Weights = cake.CakeWeights.Select(cw => new CakeDetailViewModel.WeightPrice
             {
+                CakeWeightId = cw.CakeWeight_ID,
                 Weight = cw.WeightOption.Weight,
                 Price = cw.Price
             }).ToList()

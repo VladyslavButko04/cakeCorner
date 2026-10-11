@@ -13,7 +13,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Category> Categories { get; set; }
     public DbSet<WeightOption> WeightOptions { get; set; }
     public DbSet<Flavor> Flavors { get; set; }
-
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -33,7 +34,6 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Category>().ToTable("Category").HasKey(cat => cat.Category_ID);
         modelBuilder.Entity<WeightOption>().ToTable("WeightOption").HasKey(w => w.WeightOption_ID);
         modelBuilder.Entity<Flavor>().ToTable("Flavor").HasKey(f => f.Flavor_ID);
-
 
         modelBuilder.Entity<Cake>()
             .HasMany(c => c.CakeWeights)
@@ -56,5 +56,30 @@ public class ApplicationDbContext : DbContext
             .WithMany(wo => wo.CakeWeights)
             .HasForeignKey(cw => cw.WeightOption_ID);
 
+
+        // Cart
+        modelBuilder.Entity<Cart>(entity =>
+        {
+            entity.ToTable("Cart");
+            entity.HasKey(c => c.Cart_ID);
+
+            entity.HasOne(c => c.Person)
+                .WithMany()
+                .HasForeignKey(c => c.Person_ID);
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.ToTable("CartItem");
+            entity.HasKey(ci => ci.CartItem_ID);
+
+            entity.HasOne(ci => ci.Cart)
+                .WithMany(c => c.CartItems)
+                .HasForeignKey(ci => ci.Cart_ID);
+
+            entity.HasOne(ci => ci.CakeWeight)
+                .WithMany()
+                .HasForeignKey(ci => ci.CakeWeight_ID);
+        });
     }
 }

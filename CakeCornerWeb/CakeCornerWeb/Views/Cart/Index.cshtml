@@ -1,0 +1,62 @@
+﻿@model CakeCornerWeb.Models.Entities.Cart
+
+@{
+    ViewData["Title"] = "Кошик";
+    var totalAmount = Model.CartItems.Sum(i => i.Price * i.Quantity);
+}
+
+<div class="container my-4">
+    <h2>Ваш кошик</h2>
+
+    @if (!Model.CartItems.Any())
+    {
+        <div class="alert alert-info mt-3">
+            Ваш кошик порожній. <a asp-controller="Cake" asp-action="Index">Перейти до вибору тортів</a>.
+        </div>
+    }
+    else
+    {
+        <table class="table align-middle mt-3">
+            <thead>
+                <tr>
+                    <th>Торт</th>
+                    <th>Вага</th>
+                    <th>Ціна</th>
+                    <th>Кількість</th>
+                    <th>Сума</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.CartItems)
+                {
+                    <tr>
+                        <td>
+                            <strong>@item.CakeWeight?.Cake?.CakeName</strong>
+                        </td>
+                        <td>@item.CakeWeight?.WeightOption?.Weight кг</td>
+                        <td>@item.Price.ToString("0.00") грн</td>
+                        <td>@item.Quantity</td>
+                        <td>@((item.Price * item.Quantity).ToString("0.00")) грн</td>
+                        <td>
+                            <form asp-controller="Cart" asp-action="Remove" method="post">
+                                <input type="hidden" name="cartItemId" value="@item.CartItem_ID" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Видалити</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <h4>Разом: <strong>@totalAmount.ToString("0.00") грн</strong></h4>
+            <div>
+                <form asp-controller="Cart" asp-action="Clear" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-secondary me-2">Очистити</button>
+                </form>
+                <a href="#" class="btn btn-success btn-lg">Оформити замовлення</a>
+            </div>
+        </div>
+    }
+</div>
