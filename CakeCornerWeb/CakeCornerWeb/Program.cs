@@ -20,6 +20,9 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<CustomCakeService>();
+builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, CurrentAdminHandler>();
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 builder.Services.AddHttpContextAccessor();
@@ -53,3 +56,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+public partial class Program { }

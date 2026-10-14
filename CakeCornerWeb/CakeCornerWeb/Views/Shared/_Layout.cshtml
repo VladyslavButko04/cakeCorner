@@ -43,18 +43,27 @@
                                 var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
                             }
                             <a href="/Cake" class="@(currentController == "Cake" && currentAction == "Index" ? "active" : "")">Готові рішення</a>
-                            <a href="/Cake/Constructor" class="@(currentController == "Cake" && currentAction == "Constructor" ? "active" : "")">Конструктор тортів</a>
+                            <a asp-controller="Constructor" asp-action="Index" class="@(currentController == "Constructor" ? "active" : "")">Конструктор тортів</a>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a asp-controller="Orders" asp-action="Index">Мої замовлення</a>
+                                @if(User.IsInRole("Admin")){<a asp-controller="AdminOrders" asp-action="Index">Адмін-панель</a>}
+                            }
                         </nav>
                         <div class="header-icons">
-                            <a href="/Home/Search">
+                            <a asp-controller="Cart" asp-action="Index">
                                 <img src="~/images/header/search.svg" alt="Пошук" class="search-icon" />
                             </a>
                             <a href="/Home/Cart">
                                 <img src="~/images/header/cart.svg" alt="Кошик" class="cart-icon" />
                             </a>
-                            <a href="/Account/Login">
+                            <a href="@(User.Identity?.IsAuthenticated == true ? "/Account/Profile" : "/Account/Login")">
                                 <img src="~/images/header/login.svg" alt="Увійти" class="login-icon" />
                             </a>
+                            @if(User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-controller="Account" asp-action="Logout" method="post"><button type="submit" class="btn btn-link">Вийти</button></form>
+                            }
                         </div>
                     </div>
                 </div>
@@ -73,7 +82,7 @@
                     <ul>
                         <li><a href="#">Про нас</a></li>
                         <li><a href="/Cake/Index">Готові рішення</a></li>
-                        <li><a href="/Cake/CustomCake">Конструктор тортів</a></li>
+                        <li><a asp-controller="Constructor" asp-action="Index">Конструктор тортів</a></li>
                     </ul>
                 </div>
                

@@ -19,7 +19,7 @@
                         <select name="cakeWeightId" id="weightSelect" class="form-select form-select-sm" onchange="updatePrice()">
                             @foreach (var weight in Model.Weights)
                             {
-                                <option value="@weight.CakeWeightId" data-price="@weight.Price">@weight.Weight кг</option>
+                                <option value="@weight.CakeWeightId" data-price="@weight.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">@weight.Weight кг</option>
                             }
                         </select>
                     </div>
@@ -43,7 +43,14 @@
                     </div>
 
                     <div class="d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary">Додати до кошика</button>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <button type="submit" class="btn btn-primary">Додати до кошика</button>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Увійти, щоб додати до кошика</a>
+                        }
                     </div>
                 </div>
             </form>
@@ -58,8 +65,7 @@
             let value = parseInt(input.value);
             if (!isNaN(value)) {
                 value += delta;
-                if (value < 1) value = 1;
-                input.value = value;
+                input.value = Math.min(Number(input.max), Math.max(Number(input.min), value));
                 updatePrice();
             }
         }
@@ -79,4 +85,3 @@
             document.getElementById("quantity").addEventListener("input", updatePrice);
         });
     </script>
-}

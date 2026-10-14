@@ -22,14 +22,17 @@ namespace CakeCornerWeb.Services
 
         public async Task<bool> RegisterAsync(RegisterViewModel model, int defaultRoleId)
         {
-            if (await _context.Persons.AnyAsync(p => p.Email == model.Email))
+            var email = model.Email.Trim().ToLowerInvariant();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await SqlServerLocks.AcquireAsync(_context, $"CakeCorner:Register:{email}");
+            if (await _context.Persons.AnyAsync(p => p.Email.ToLower() == email))
                 return false;
 
             var hashedPassword = _passwordHasher.Generate(model.Password);
 
             var person = Person.Create(
-                name: model.Name,
-                email: model.Email,
+                name: model.Name.Trim(),
+                email: email,
                 passwordHash: hashedPassword,
                 role_ID: defaultRoleId,
                 phone: model.Phone
@@ -37,6 +40,7 @@ namespace CakeCornerWeb.Services
 
             _context.Persons.Add(person);
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return true;
         }
@@ -50,7 +54,7 @@ namespace CakeCornerWeb.Services
 
         public async Task<string?> LoginAsync(string email, string password)
         {
-
+            email = email.Trim().ToLowerInvariant();
             var person = await _context.Persons
                 .Include(p => p.Role)
                 .FirstOrDefaultAsync(p => p.Email.ToLower().Trim() == email.ToLower().Trim());

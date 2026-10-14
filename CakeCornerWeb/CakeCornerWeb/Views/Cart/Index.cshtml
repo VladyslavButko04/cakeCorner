@@ -2,13 +2,20 @@
 
 @{
     ViewData["Title"] = "Кошик";
-    var totalAmount = Model.CartItems.Sum(i => i.Price * i.Quantity);
+    var totalAmount = Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.CustomItems.Sum(i => i.UnitPrice * i.Quantity);
 }
 
 <div class="container my-4">
     <h2>Ваш кошик</h2>
 
-    @if (!Model.CartItems.Any())
+     @if (TempData["CartError"] is string error)
+    {
+        <div class="alert alert-danger" role="alert">@error</div>
+    }
+
+    <p class="text-muted">Ціни готових тортів оновлюються з каталогу. Ціна кастомного торта розраховується при додаванні конфігурації.</p>
+
+    @if (!Model.CartItems.Any() && !Model.CustomItems.Any())
     {
         <div class="alert alert-info mt-3">
             Ваш кошик порожній. <a asp-controller="Cake" asp-action="Index">Перейти до вибору тортів</a>.
@@ -36,7 +43,15 @@
                         </td>
                         <td>@item.CakeWeight?.WeightOption?.Weight кг</td>
                         <td>@item.Price.ToString("0.00") грн</td>
-                        <td>@item.Quantity</td>
+                        <td>
+                            <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="d-flex gap-2 align-items-center">
+                                <input type="hidden" name="cartItemId" value="@item.CartItem_ID" />
+                                <input type="number" name="quantity" value="@item.Quantity" min="1"
+                                       max="@CartLimits.MaxQuantity" required class="form-control form-control-sm"
+                                       style="width: 5rem" aria-label="Кількість: @item.CakeWeight?.Cake?.CakeName" />
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Оновити</button>
+                            </form>
+                        </td>
                         <td>@((item.Price * item.Quantity).ToString("0.00")) грн</td>
                         <td>
                             <form asp-controller="Cart" asp-action="Remove" method="post">
@@ -44,6 +59,22 @@
                                 <button type="submit" class="btn btn-outline-danger btn-sm">Видалити</button>
                             </form>
                         </td>
+                    </tr>
+                }
+                @foreach (var item in Model.CustomItems)
+                {
+                    <tr>
+                        <td><strong>Кастомний торт</strong><p>@item.CustomCake.Description</p>@if(!string.IsNullOrWhiteSpace(item.CustomCake.Inscription)){<p>Напис: @item.CustomCake.Inscription</p>}</td>
+                        <td>@item.CustomCake.Weight кг</td><td>@item.UnitPrice.ToString("0.00") грн</td>
+                        <td>
+                            <form asp-controller="Constructor" asp-action="UpdateQuantity" method="post" class="d-flex gap-2">
+                                <input type="hidden" name="cartItemId" value="@item.CustomCakeCart_ID" />
+                                <input type="number" name="quantity" value="@item.Quantity" min="1" max="@CartLimits.MaxQuantity" required class="form-control" aria-label="Кількість кастомних тортів" />
+                                <button class="btn btn-outline-primary btn-sm" type="submit">Оновити</button>
+                            </form>
+                        </td>
+                        <td>@((item.UnitPrice * item.Quantity).ToString("0.00")) грн</td>
+                        <td><form asp-controller="Constructor" asp-action="Remove" method="post"><input type="hidden" name="cartItemId" value="@item.CustomCakeCart_ID" /><button class="btn btn-outline-danger btn-sm" type="submit">Видалити</button></form></td>
                     </tr>
                 }
             </tbody>
@@ -55,7 +86,7 @@
                 <form asp-controller="Cart" asp-action="Clear" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-secondary me-2">Очистити</button>
                 </form>
-                <a href="#" class="btn btn-success btn-lg">Оформити замовлення</a>
+                 <a asp-controller="Orders" asp-action="Checkout" class="btn btn-success btn-lg">Оформити замовлення</a>
             </div>
         </div>
     }

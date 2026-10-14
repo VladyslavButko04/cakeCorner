@@ -1,11 +1,13 @@
 ﻿using System.Security.Claims;
-using CakeCornerWeb.Interfaces;
+using CakeCornerWeb.Interfaces.;
+using CakeCornerWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CakeCornerWeb.Controllers
 {
     [Authorize]
+    [AutoValidateAntiforgeryToken]
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
@@ -19,9 +21,10 @@ namespace CakeCornerWeb.Controllers
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                         ?? User.FindFirst("Person_ID")?.Value
+                        ?? User.FindFirst("person_ID")?.Value
                         ?? User.FindFirst("sub")?.Value;
 
-            if (int.TryParse(userIdClaim, out int userId))
+            if (int.TryParse(userIdClaim, out int userId) && userId > 0)
             {
                 return userId;
             }
@@ -30,6 +33,7 @@ namespace CakeCornerWeb.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var userId = GetCurrentUserId();
@@ -43,7 +47,7 @@ namespace CakeCornerWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(int cakeWeightId, int quantity = 1)
+        public async Task<IActionResult> Add(AddCartItemRequest request)
         {
             var userId = GetCurrentUserId();
             if (userId == null)
@@ -51,12 +55,16 @@ namespace CakeCornerWeb.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            await _cartService.AddToCartAsync(userId.Value, cakeWeightId, quantity);
-            return RedirectToAction("Index");
+            if (!ModelState.IsValid)
+                return InvalidQuantity();
+            
+
+            var result = await _cartService.AddToCartAsync(userId.Value, request.CakeWeightId, request.Quantity);
+            return OperationResult(result); 
         }
 
         [HttpPost]
-        public async Task<IActionResult> Remove(int cartItemId)
+        public async Task<IActionResult> UpdateQuantity(UpdateCartItemRequest request)
         {
             var userId = GetCurrentUserId();
             if (userId == null)
@@ -64,8 +72,11 @@ namespace CakeCornerWeb.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            await _cartService.RemoveFromCartAsync(userId.Value, cartItemId);
-            return RedirectToAction("Index");
+            if (!ModelState.IsValid || request.CartItemId <= 0)
+                return BadRequest();
+
+            var result = await _cartService.UpdateQuantityAsync(userId.Value, request.CartItemId, request.Quantity);
+            return OperationResult(result);
         }
 
         [HttpPost]
@@ -79,6 +90,20 @@ namespace CakeCornerWeb.Controllers
 
             await _cartService.ClearCartAsync(userId.Value);
             return RedirectToAction("Index");
+        }
+
+        private IActionResult OperationResult(CartOperationResult result) => result switch
+        {
+            CartOperationResult.Success => RedirectToAction("Index"),
+            CartOperationResult.NotFound => NotFound(),
+            CartOperationResult.InvalidQuantity => InvalidQuantity(),
+            _ => throw new ArgumentOutOfRangeException(nameof(result))
+        };
+
+        private IActionResult InvalidQuantity()
+        {
+            TempData["CartError"] = $"Кількість має бути від 1 до {CartLimits.MaxQuantity}.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }
