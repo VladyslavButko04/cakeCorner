@@ -1,6 +1,7 @@
 ﻿using CakeCornerWeb.Interfaces;
 using CakeCornerWeb.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using CakeCornerWeb.Data;
 
 namespace CakeCornerWeb.Services
 {
@@ -22,17 +23,14 @@ namespace CakeCornerWeb.Services
 
         public async Task<bool> RegisterAsync(RegisterViewModel model, int defaultRoleId)
         {
-            var email = model.Email.Trim().ToLowerInvariant();
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-            await SqlServerLocks.AcquireAsync(_context, $"CakeCorner:Register:{email}");
-            if (await _context.Persons.AnyAsync(p => p.Email.ToLower() == email))
+            if (await _context.Persons.AnyAsync(p => p.Email == model.Email))
                 return false;
 
             var hashedPassword = _passwordHasher.Generate(model.Password);
 
             var person = Person.Create(
                 name: model.Name.Trim(),
-                email: email,
+                email: model.Email,
                 passwordHash: hashedPassword,
                 role_ID: defaultRoleId,
                 phone: model.Phone
@@ -40,7 +38,6 @@ namespace CakeCornerWeb.Services
 
             _context.Persons.Add(person);
             await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
 
             return true;
         }

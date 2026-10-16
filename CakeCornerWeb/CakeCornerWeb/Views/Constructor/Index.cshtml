@@ -1,0 +1,102 @@
+﻿@{
+    ViewData["Title"] = "Конструктор тортів";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-3 text-primary">Створіть свій унікальний торт</h2>
+    <p class="text-muted mb-4">Оберіть компоненти, а наша система допоможе підібрати ідеальне поєднання смаків та перевірить їх технологічну сумісність.</p>
+
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <form id="customCakeForm">
+                
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Крок 1. Базові параметри</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Кількість гостей</label>
+                            <input type="number" class="form-control" id="guestCount" value="10" min="5" max="100" />
+                            <small class="text-muted">Система автоматично розрахує рекомендовану вагу.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Форма торта</label>
+                            <select class="form-select">
+                                <option>Кругла</option>
+                                <option>Квадратна</option>
+                                <option>Серце</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Крок 2. Смак та текстура</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Тип бісквіта</label>
+                            <select class="form-select">
+                                <option>Шоколадний (Насичений)</option>
+                                <option>Ванільний (Легкий)</option>
+                                <option>Червоний оксамит</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Основний крем</label>
+                            <select class="form-select">
+                                <option>Крем-чиз на вершках</option>
+                                <option>Шоколадний ганаш</option>
+                                <option>Йогуртовий мус</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Крок 3. Декор та побажання</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Опис декору</label>
+                            <textarea class="form-control" rows="3" placeholder="Наприклад: мінімалізм, свіжі ягоди, напис 'З Днем Народження'"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-primary sticky-top" style="top: 30px;">
+                <div class="card-body">
+                    <h4 class="card-title text-center mb-4">Попередній розрахунок</h4>
+                    
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Рекомендована вага:</span>
+                            <strong>~2.0 кг</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Показник сумісності:</span>
+                            <span class="badge bg-success rounded-pill px-3 py-2">Висока</span> 
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center mt-3 border-0 fs-5">
+                            <span>Орієнтовна вартість:</span>
+                            <strong class="text-primary">1 400 грн</strong>
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-info small pb-2" role="alert">
+                        <strong>Підказка:</strong> Ванільний бісквіт чудово поєднується з йогуртовим мусом. Складання цього торта безпечне для транспортування.
+                    </div>
+
+                    <button class="btn btn-primary btn-lg w-100 mt-2">Підтвердити конфігурацію</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@ using CakeCornerWeb.Interfaces;
 using CakeCornerWeb.Services;
 using CakeCornerWeb.Services.Security;
 using Microsoft.EntityFrameworkCore;
+using CakeCornerWeb.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,9 +21,6 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<CustomCakeService>();
-builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, CurrentAdminHandler>();
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 builder.Services.AddHttpContextAccessor();

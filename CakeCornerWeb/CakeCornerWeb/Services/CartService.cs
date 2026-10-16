@@ -1,7 +1,8 @@
-﻿using CakeCornerWeb;
-using CakeCornerWeb.Interfaces;
+﻿using CakeCornerWeb.Interfaces;
+using CakeCornerWeb.Models;
 using CakeCornerWeb.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using CakeCornerWeb.Data;
 
 namespace CakeCornerWeb.Services
 {
@@ -32,22 +33,35 @@ namespace CakeCornerWeb.Services
             return cart;
         }
 
-        public async Task AddToCartAsync(int personId, int cakeWeightId, int quantity = 1)
+        public async Task<CartOperationResult> AddToCartAsync(int personId, int cakeWeightId, int quantity = 1)
         {
+            if (quantity <= 0 || quantity > CartLimits.MaxQuantity)
+            {
+                return CartOperationResult.InvalidQuantity;
+            }
+
             var cart = await GetOrCreateCartAsync(personId);
 
             var cakeWeight = await _context.Set<CakeWeight>()
-            .Include(cw => cw.Cake)
-            .FirstOrDefaultAsync(cw => cw.CakeWeight_ID == cakeWeightId);
+                .Include(cw => cw.Cake)
+                .FirstOrDefaultAsync(cw => cw.CakeWeight_ID == cakeWeightId);
 
-            if (cakeWeight == null) return;
+            if (cakeWeight == null)
+            {
+                return CartOperationResult.NotFound;
+            }
 
             var existingItem = cart.CartItems
                 .FirstOrDefault(ci => ci.CakeWeight_ID == cakeWeightId);
 
             if (existingItem != null)
             {
-                existingItem.Quantity += quantity;
+                int newQuantity = existingItem.Quantity + quantity;
+                if (newQuantity > CartLimits.MaxQuantity)
+                {
+                    return CartOperationResult.InvalidQuantity;
+                }
+                existingItem.Quantity = newQuantity;
             }
             else
             {
@@ -64,19 +78,55 @@ namespace CakeCornerWeb.Services
 
             cart.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+
+            return CartOperationResult.Success;
         }
 
-        public async Task RemoveFromCartAsync(int personId, int cartItemId)
+        public async Task<CartOperationResult> UpdateQuantityAsync(int personId, int cartItemId, int quantity)
+        {
+            if (quantity > CartLimits.MaxQuantity)
+            {
+                return CartOperationResult.InvalidQuantity;
+            }
+
+            var cart = await GetOrCreateCartAsync(personId);
+            var item = cart.CartItems.FirstOrDefault(ci => ci.CartItem_ID == cartItemId);
+
+            if (item == null)
+            {
+                return CartOperationResult.NotFound;
+            }
+
+            if (quantity <= 0)
+            {
+                _context.CartItems.Remove(item);
+            }
+            else
+            {
+                item.Quantity = quantity;
+            }
+
+            cart.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return CartOperationResult.Success;
+        }
+
+        public async Task<CartOperationResult> RemoveFromCartAsync(int personId, int cartItemId)
         {
             var cart = await GetOrCreateCartAsync(personId);
             var item = cart.CartItems.FirstOrDefault(ci => ci.CartItem_ID == cartItemId);
 
-            if (item != null)
+            if (item == null)
             {
-                _context.CartItems.Remove(item);
-                cart.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                return CartOperationResult.NotFound;
             }
+
+            _context.CartItems.Remove(item);
+            cart.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return CartOperationResult.Success;
         }
 
         public async Task ClearCartAsync(int personId)

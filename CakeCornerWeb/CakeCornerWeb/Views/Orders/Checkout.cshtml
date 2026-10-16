@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Оформлення замовлення";
+}
+
+<div class="container my-5">
+    <h2 class="mb-4">Оформлення замовлення</h2>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Ваші дані</h5>
+                    <form id="checkoutForm" method="post" asp-action="SubmitOrder">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ім'я</label>
+                                <input type="text" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Телефон</label>
+                                <input type="tel" class="form-control" placeholder="+38 (000) 000-00-00" required />
+                            </div>
+                        </div>
+
+                        <h5 class="card-title mb-3 mt-4">Доставка</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Спосіб отримання</label>
+                            <select class="form-select" name="deliveryMethod">
+                                <option value="pickup">Самовивіз з пекарні</option>
+                                <option value="courier">Кур'єрська доставка</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Коментар або дата готовності</label>
+                            <textarea class="form-control" rows="3" placeholder="Наприклад: потрібно на 15 березня..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 mt-3">Підтвердити замовлення</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body bg-light">
+                    <h5 class="card-title mb-3">Підсумок</h5>
+
+                    <div class="alert alert-info py-2">
+                        <small>Пізніше тут буде відображатися список товарів з вашого кошика.</small>
+                    </div>
+
+                    <hr />
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fs-5">До оплати:</span>
+                        <strong class="fs-4 text-primary">0.00 грн</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

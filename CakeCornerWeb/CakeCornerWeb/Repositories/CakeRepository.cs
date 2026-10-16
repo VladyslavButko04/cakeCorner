@@ -2,6 +2,7 @@
 using CakeCornerWeb.Interfaces;
 using CakeCornerWeb.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using CakeCornerWeb.Data;
 
 public class CakeRepository : ICakeRepository
 {

@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using CakeCornerWeb.Interfaces.;
+using CakeCornerWeb.Interfaces;
 using CakeCornerWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -47,9 +47,9 @@ namespace CakeCornerWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(AddCartItemRequest request)
+        public async Task<IActionResult> Add(AddToCartRequest request)
         {
-            var userId = GetCurrentUserId();
+            var userId = GetCurrentUserId();    
             if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
@@ -90,6 +90,23 @@ namespace CakeCornerWeb.Controllers
 
             await _cartService.ClearCartAsync(userId.Value);
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Remove(int cartItemId)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            if (cartItemId <= 0)
+            {
+                return BadRequest();
+            }
+
+            var result = await _cartService.RemoveFromCartAsync(userId.Value, cartItemId);
+            return OperationResult(result);
         }
 
         private IActionResult OperationResult(CartOperationResult result) => result switch

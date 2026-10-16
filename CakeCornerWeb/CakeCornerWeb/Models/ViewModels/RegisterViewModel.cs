@@ -4,9 +4,11 @@ public class RegisterViewModel
 {
     [Required(ErrorMessage = "Електронна пошта обов’язкова")]
     [EmailAddress(ErrorMessage = "Невірний формат електронної пошти")]
+    [StringLength(50)]
     public string Email { get; set; } = null!;
 
     [Required(ErrorMessage = "Ім’я обов’язкове")]
+    [StringLength(50)]
     public string Name { get; set; } = null!;
 
     [Required(ErrorMessage = "Пароль обов’язковий")]
@@ -21,5 +23,6 @@ public class RegisterViewModel
 
     [DataType(DataType.PhoneNumber)]
     [Phone(ErrorMessage = "Невірний формат телефону")]
+    [StringLength(20)]
     public string? Phone { get; set; }
 }

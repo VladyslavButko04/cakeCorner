@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Мої замовлення";
+}
+
+<div class="container my-5">
+    @if (TempData["SuccessMessage"] is string message)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @message
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <h2 class="mb-4">Історія замовлень</h2>
+
+    <div class="alert alert-info">
+        Тут відображатиметься список ваших замовлень.
+    </div>
+
+    <a asp-controller="Cake" asp-action="Index" class="btn btn-outline-primary">Перейти до каталогу тортів</a>
+</div>

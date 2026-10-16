@@ -3,18 +3,26 @@ using Microsoft.AspNetCore.Mvc;
 using CakeCornerWeb.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using CakeCornerWeb.Extensions;
+using Microsoft.Extensions.Options;
+using CakeCornerWeb.Services.Security;
+using Microsoft.EntityFrameworkCore;
+using CakeCornerWeb.Data;
 
 public class AccountController : Controller
 {
     private readonly IPersonService _personService;
     private readonly ApplicationDbContext _context;
+    private readonly JwtOptions _jwtOptions;
 
     public AccountController(
         IPersonService personService,
-        ApplicationDbContext context)
+        ApplicationDbContext context,
+        IOptions<JwtOptions> jwtOptions)    
     {
         _personService = personService;
         _context = context;
+        _jwtOptions = jwtOptions.Value;
     }
 
 
@@ -27,12 +35,19 @@ public class AccountController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
             return View(model);
 
-        int defaultRoleId = 2;
+        var clientRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Client");
+        if (clientRole == null)
+        {
+            ModelState.AddModelError("", "Реєстрація тимчасово недоступнаю.");
+            return View(model);
+        }
+        int defaultRoleId = clientRole.Role_ID;
 
         var result = await _personService.RegisterAsync(model, defaultRoleId);
 
@@ -48,14 +63,18 @@ public class AccountController : Controller
 
     // LOGIN
     [HttpGet]
-    public IActionResult Login()
+    public IActionResult Login(string? returnUrl = null)
     {
+        ViewData["ReturnUrl"] = Url.IsLocalUrl(returnUrl) ? returnUrl : null;
         return View();
     }
 
+
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
+        ViewData["ReturnUrl"] = Url.IsLocalUrl(returnUrl) ? returnUrl : null;
         if (!ModelState.IsValid)
         {
             Console.WriteLine(">>> Model is not valid");
@@ -73,16 +92,17 @@ public class AccountController : Controller
         HttpContext.Response.Cookies.Append("testy-cookies", token, new CookieOptions
         {
             HttpOnly = true,
-            Secure = false,
+            Secure = Request.IsHttps,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddHours(1)
+            Expires = DateTime.UtcNow.AddHours(_jwtOptions.ExpiresHours)
         });
 
-        return RedirectToAction("Index", "Home");
+        return Url.IsLocalUrl(returnUrl) ? LocalRedirect(returnUrl!) : RedirectToAction("Index", "Home");
     }
 
 
-    [HttpGet]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Logout()
     {
         HttpContext.Response.Cookies.Delete("testy-cookies");

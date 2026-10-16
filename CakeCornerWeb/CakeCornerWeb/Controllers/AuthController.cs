@@ -6,12 +6,12 @@ namespace CakeCornerWeb.Controllers
     {
         public IActionResult Register()
         {
-            return View();
+            return RedirectToAction("Register", "Account");
         }
 
         public IActionResult Login()
         {
-            return View();
+            return RedirectToAction("Login", "Account");
         }
     }
 }

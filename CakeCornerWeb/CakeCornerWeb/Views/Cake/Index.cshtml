@@ -1,55 +1,71 @@
 ﻿@using CakeCornerWeb.Models
 @model List<CakeCornerWeb.Models.Entities.Cake>
-    
+
 @{
-    ViewData["Title"] = "Список тортів";
-    var filterModel = ViewBag.FilterModel as CakeCornerWeb.Models.CakeFilterViewModel;
+    ViewData["Title"] = ViewData["SearchQuery"] != null ? "Результати пошуку" : "Список тортів";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/cakes.css" />
 }
 
+@if (ViewData["SearchQuery"] != null)
+{
+    <div class="alert alert-info d-flex justify-content-between align-items-center mb-4">
+        <span>Результати пошуку за запитом: <strong>@ViewData["SearchQuery"]</strong></span>
+        <a href="@Url.Action("Index", "Cake")" class="btn btn-sm btn-outline-secondary">Повернутися до каталогу</a>
+    </div>
+}
+
 <h2 class="mb-4">🍰 Наші торти</h2>
 
-<form method="get" class="mb-4" id="filterForm">
-    <div class="row g-3 align-items-center">
-        <div class="col-md-4">
-            <select name="categoryId" class="form-select" onchange="submitForm()">
-                @foreach (var item in filterModel.Categories)
-                {
-                    <option value="@item.Value" selected="@(item.Value == filterModel.CategoryId?.ToString())">
-                        @item.Text
-                    </option>
-                }
-            </select>
-        </div>
-        <div class="col-md-4">
-            <select name="flavorId" class="form-select" onchange="submitForm()">
-                @foreach (var item in filterModel.Flavors)
-                {
-                    <option value="@item.Value" selected="@(item.Value == filterModel.FlavorId?.ToString())">
-                        @item.Text
-                    </option>
-                }
-            </select>
-        </div>
-        <div class="col-md-4">
-            <a href="@Url.Action("Index", "Cake")" class="btn btn-outline-danger" id="resetFiltersBtn">
-                🚫 Прибрати фільтри
-            </a>
-        </div>
-    </div>
-</form>
+@{
+    var formFilterModel = ViewBag.FilterModel as CakeCornerWeb.Models.CakeFilterViewModel;
+}
 
-@if (Model.Any())
+@if (formFilterModel != null && formFilterModel.Categories != null && formFilterModel.Flavors != null)
+{
+    <form method="get" class="mb-4" id="filterForm">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <select name="categoryId" class="form-select" onchange="submitForm()">
+                    @foreach (var item in formFilterModel.Categories)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == formFilterModel.CategoryId?.ToString())">
+                            @item.Text
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select name="flavorId" class="form-select" onchange="submitForm()">
+                    @foreach (var item in formFilterModel.Flavors)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == formFilterModel.FlavorId?.ToString())">
+                            @item.Text
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <a href="@Url.Action("Index", "Cake")" class="btn btn-outline-danger" id="resetFiltersBtn">
+                    🚫 Прибрати фільтри
+                </a>
+            </div>
+        </div>
+    </form>
+}
+
+@if (Model != null && Model.Any())
 {
     <div class="row">
         @foreach (var cake in Model)
         {
-            var hasWeights = cake.CakeWeights != null && cake.CakeWeights.Any();
-            var minWeight = hasWeights ? cake.CakeWeights.Min(w => w.WeightOption.Weight) : 0;
-            var minPrice = hasWeights ? cake.CakeWeights.Min(w => w.Price) : 0;
+            var validWeights = cake.CakeWeights?.Where(w => w.WeightOption != null).ToList();
+            var hasWeights = validWeights != null && validWeights.Any();
+
+            var minWeight = hasWeights ? validWeights.Min(w => w.WeightOption.Weight) : 0;
+            var minPrice = hasWeights ? validWeights.Min(w => w.Price) : 0;
 
             <div class="col-md-4 mb-4">
                 <div class="custom-cake-card">
@@ -79,27 +95,34 @@
 else
 {
     <div class="alert alert-warning mt-4 text-center" role="alert">
-        🧐 Нажаль, тортів за заданими фільтрами не знайдено.
+        🧐 Нажаль, тортів за заданими параметрами не знайдено.
     </div>
 }
 
 @section Scripts {
-    <script>
-        window.onload = function () {
-            const categoryId = "@filterModel.CategoryId";
-            const flavorId = "@filterModel.FlavorId";
+    @{
+        var scriptFilterModel = ViewBag.FilterModel as CakeCornerWeb.Models.CakeFilterViewModel;
+    }
 
-            const resetBtn = document.getElementById("resetFiltersBtn");
+    @if (scriptFilterModel != null)
+    {
+        <script>
+            window.onload = function () {
+                const categoryId = "@scriptFilterModel.CategoryId";
+                const flavorId = "@scriptFilterModel.FlavorId";
 
-            if (categoryId || flavorId) {
-                resetBtn.style.display = "inline-block";
-            } else {
-                resetBtn.style.display = "none";
+                const resetBtn = document.getElementById("resetFiltersBtn");
+
+                if (categoryId || flavorId) {
+                    resetBtn.style.display = "inline-block";
+                } else {
+                    resetBtn.style.display = "none";
+                }
+            };
+
+            function submitForm() {
+                document.getElementById("filterForm").submit();
             }
-        };
-
-        function submitForm() {
-            document.getElementById("filterForm").submit();
-        }
-    </script>
+        </script>
+    }
 }
