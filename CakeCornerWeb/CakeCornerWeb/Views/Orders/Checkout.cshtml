@@ -1,0 +1,69 @@
+﻿@model CheckoutPage
+@{ ViewData["Title"] = "Оформлення замовлення"; }
+<div class="container my-5">
+    <h2 class="mb-4">Оформлення замовлення</h2>
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm"><div class="card-body">
+                <form id="checkoutForm" asp-action="Checkout" method="post">
+                    <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+                    <input asp-for="Request.CheckoutToken" type="hidden" />
+                    <input asp-for="Request.CartFingerprint" type="hidden" />
+                    <input asp-for="Request.ExpectedTotal" type="hidden" />
+                    <h5 class="card-title mb-3">Контактні дані</h5>
+                    <div class="mb-3">
+                        <label asp-for="Request.PhoneNumber" class="form-label">Телефон для зв'язку</label>
+                        <input asp-for="Request.PhoneNumber" type="tel" class="form-control" maxlength="20" required placeholder="+380501112233" />
+                        <span asp-validation-for="Request.PhoneNumber" class="text-danger"></span>
+                    </div>
+                    <h5 class="card-title mb-3 mt-4">Самовивіз</h5>
+                    <div class="mb-3">
+                        <label asp-for="Request.PickupLocationId" class="form-label">Пункт видачі</label>
+                        <select asp-for="Request.PickupLocationId" class="form-select" required>
+                            <option value="">Оберіть пункт видачі</option>
+                            @foreach(var place in Model.Locations)
+                            { <option value="@place.PickupLocation_ID">@place.City.CityName, @place.Address</option> }
+                        </select>
+                        <span asp-validation-for="Request.PickupLocationId" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Request.DeliveryDateTime" class="form-label">Бажана дата та час отримання (Київ)</label>
+                        <input asp-for="Request.DeliveryDateTime" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control" required />
+                        <small class="text-muted">Від завтра до 90 днів наперед. Можливість виготовлення на цю дату підтвердить кондитерська.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Request.Comment" class="form-label">Коментар до замовлення</label>
+                        <textarea asp-for="Request.Comment" class="form-control" rows="3" maxlength="300"></textarea>
+                    </div>
+                    <label class="mb-3"><input asp-for="Request.RequiredCallback" /> Передзвоніть мені для уточнення деталей</label>
+                    <p class="alert alert-info">Оплата при отриманні. Онлайн-списання коштів не виконується.</p>
+                    @if(!Model.Locations.Any()){<p class="alert alert-warning">Зараз немає доступних пунктів видачі. Зверніться до кондитерської.</p>}
+                    <button type="submit" class="btn btn-success btn-lg w-100 mt-3" disabled="@(!Model.Locations.Any() || Model.Total <= 0)">Підтвердити замовлення</button>
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Повернутися до кошика</a>
+                </form>
+            </div></div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top:20px"><div class="card-body bg-light">
+                <h5 class="card-title mb-3">Ваше замовлення</h5>
+                @foreach(var item in Model.Cart.CartItems)
+                {
+                    <div class="mb-3"><strong>@item.CakeWeight.Cake.CakeName</strong>
+                        <div>@item.CakeWeight.WeightOption.Weight кг × @item.Quantity</div>
+                        <div>@((item.Price * item.Quantity).ToString("0.00")) грн</div>
+                    </div>
+                }
+                @foreach(var item in Model.Cart.CustomItems)
+                {
+                    <div class="mb-3"><strong>Кастомний торт</strong>
+                        <div>@item.CustomCake.Weight кг × @item.Quantity</div>
+                        <small>@item.CustomCake.ConfigurationDescription</small>
+                        @if(!string.IsNullOrWhiteSpace(item.CustomCake.Inscription)){<p>Напис: @item.CustomCake.Inscription</p>}
+                        <div>@((item.UnitPrice * item.Quantity).ToString("0.00")) грн</div>
+                    </div>
+                }
+                <hr /><div class="d-flex justify-content-between align-items-center"><span class="fs-5">До оплати:</span><strong class="fs-4 text-primary">@Model.Total.ToString("0.00") грн</strong></div>
+            </div></div>
+        </div>
+    </div>
+</div>

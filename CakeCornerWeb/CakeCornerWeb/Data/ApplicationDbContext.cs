@@ -1,85 +1,101 @@
 ﻿using CakeCornerWeb.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Security.AccessControl;
 
-public class ApplicationDbContext : DbContext
+namespace CakeCornerWeb.Data
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options) { }
-
-    public DbSet<Person> Persons { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<Cake> Cakes { get; set; }
-    public DbSet<CakeWeight> CakeWeights { get; set; }
-    public DbSet<Category> Categories { get; set; }
-    public DbSet<WeightOption> WeightOptions { get; set; }
-    public DbSet<Flavor> Flavors { get; set; }
-    public DbSet<Cart> Carts { get; set; }
-    public DbSet<CartItem> CartItems { get; set; }
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class ApplicationDbContext : DbContext
     {
-        base.OnModelCreating(modelBuilder);
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options) { }
 
-        // Person
-        modelBuilder.Entity<Person>().ToTable("Person").HasKey(c => c.Person_ID);
-        modelBuilder.Entity<Role>().ToTable("Role").HasKey(r => r.Role_ID);
-
-        modelBuilder.Entity<Person>()
-            .HasOne(c => c.Role)
-            .WithMany(r => r.Persons)
-            .HasForeignKey(c => c.Role_ID);
-
-        // DefaultCakes
-        modelBuilder.Entity<Cake>().ToTable("Cake").HasKey(c => c.Cake_ID);
-        modelBuilder.Entity<CakeWeight>().ToTable("CakeWeight").HasKey(cw => cw.CakeWeight_ID);
-        modelBuilder.Entity<Category>().ToTable("Category").HasKey(cat => cat.Category_ID);
-        modelBuilder.Entity<WeightOption>().ToTable("WeightOption").HasKey(w => w.WeightOption_ID);
-        modelBuilder.Entity<Flavor>().ToTable("Flavor").HasKey(f => f.Flavor_ID);
-
-        modelBuilder.Entity<Cake>()
-            .HasMany(c => c.CakeWeights)
-            .WithOne(w => w.Cake)
-            .HasForeignKey(w => w.Cake_ID);
-
-        modelBuilder.Entity<Cake>()
-            .HasOne(c => c.Category)
-            .WithMany(cat => cat.Cakes)
-            .HasForeignKey(c => c.Category_ID);
-
-        modelBuilder.Entity<Cake>()
-            .HasOne(c => c.Flavor)
-            .WithMany(f => f.Cakes)
-            .HasForeignKey(c => c.Flavor_ID)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<CakeWeight>()
-            .HasOne(cw => cw.WeightOption)
-            .WithMany(wo => wo.CakeWeights)
-            .HasForeignKey(cw => cw.WeightOption_ID);
-
-
-        // Cart
-        modelBuilder.Entity<Cart>(entity =>
+        public DbSet<Person> Persons { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Cake> Cakes { get; set; }
+        public DbSet<CakeWeight> CakeWeights { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<WeightOption> WeightOptions { get; set; }
+        public DbSet<Flavor> Flavors { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<PersonOrder> Orders => Set<PersonOrder>();
+        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+        public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
+        public DbSet<OrderStatusHistory> OrderHistory => Set<OrderStatusHistory>();
+        public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<PickupLocation> PickupLocations => Set<PickupLocation>();
+        public DbSet<City> Cities => Set<City>();
+        public DbSet<Ingredient> Ingredients => Set<Ingredient>();
+        public DbSet<IngredientType> IngredientTypes => Set<IngredientType>();
+        public DbSet<CustomCake> CustomCakes => Set<CustomCake>();
+        public DbSet<CustomCakeCart> CustomCartItems => Set<CustomCakeCart>();
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            entity.ToTable("Cart");
-            entity.HasKey(c => c.Cart_ID);
+            base.OnModelCreating(modelBuilder);
+            OrderModelConfiguration.Configure(modelBuilder);
 
-            entity.HasOne(c => c.Person)
-                .WithMany()
-                .HasForeignKey(c => c.Person_ID);
-        });
+            // Person
+            modelBuilder.Entity<Person>().ToTable("Person").HasKey(c => c.Person_ID);
+            modelBuilder.Entity<Role>().ToTable("Role").HasKey(r => r.Role_ID);
 
-        modelBuilder.Entity<CartItem>(entity =>
-        {
-            entity.ToTable("CartItem");
-            entity.HasKey(ci => ci.CartItem_ID);
+            modelBuilder.Entity<Person>()
+                .HasOne(c => c.Role)
+                .WithMany(r => r.Persons)
+                .HasForeignKey(c => c.Role_ID);
 
-            entity.HasOne(ci => ci.Cart)
-                .WithMany(c => c.CartItems)
-                .HasForeignKey(ci => ci.Cart_ID);
+            // DefaultCakes
+            modelBuilder.Entity<Cake>().ToTable("Cake").HasKey(c => c.Cake_ID);
+            modelBuilder.Entity<CakeWeight>().ToTable("CakeWeight").HasKey(cw => cw.CakeWeight_ID);
+            modelBuilder.Entity<Category>().ToTable("Category").HasKey(cat => cat.Category_ID);
+            modelBuilder.Entity<WeightOption>().ToTable("WeightOption").HasKey(w => w.WeightOption_ID);
+            modelBuilder.Entity<Flavor>().ToTable("Flavor").HasKey(f => f.Flavor_ID);
 
-            entity.HasOne(ci => ci.CakeWeight)
-                .WithMany()
-                .HasForeignKey(ci => ci.CakeWeight_ID);
-        });
+            modelBuilder.Entity<Cake>()
+                .HasMany(c => c.CakeWeights)
+                .WithOne(w => w.Cake)
+                .HasForeignKey(w => w.Cake_ID);
+
+            modelBuilder.Entity<Cake>()
+                .HasOne(c => c.Category)
+                .WithMany(cat => cat.Cakes)
+                .HasForeignKey(c => c.Category_ID);
+
+            modelBuilder.Entity<Cake>()
+                .HasOne(c => c.Flavor)
+                .WithMany(f => f.Cakes)
+                .HasForeignKey(c => c.Flavor_ID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CakeWeight>()
+                .HasOne(cw => cw.WeightOption)
+                .WithMany(wo => wo.CakeWeights)
+                .HasForeignKey(cw => cw.WeightOption_ID);
+
+
+            // Cart
+            modelBuilder.Entity<Cart>(entity =>
+            {
+                entity.ToTable("Cart");
+                entity.HasKey(c => c.Cart_ID);
+
+                entity.HasOne(c => c.Person)
+                    .WithMany()
+                    .HasForeignKey(c => c.Person_ID);
+            });
+
+            modelBuilder.Entity<CartItem>(entity =>
+            {
+                entity.ToTable("CartItem");
+                entity.HasKey(ci => ci.CartItem_ID);
+
+                entity.HasOne(ci => ci.Cart)
+                    .WithMany(c => c.CartItems)
+                    .HasForeignKey(ci => ci.Cart_ID);
+
+                entity.HasOne(ci => ci.CakeWeight)
+                    .WithMany()
+                    .HasForeignKey(ci => ci.CakeWeight_ID);
+            });
+        }
     }
 }

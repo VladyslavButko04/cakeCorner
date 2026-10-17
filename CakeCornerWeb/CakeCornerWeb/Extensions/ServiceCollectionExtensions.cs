@@ -42,6 +42,22 @@ namespace CakeCornerWeb.Extensions
                             context.Token = token;
                         }
                         return Task.CompletedTask;
+                    },
+
+                    OnChallenge = context =>
+                    {
+                        // MVC navigation should take visitors to login; mutation/API requests retain 401.
+                        if (HttpMethods.IsGet(context.Request.Method) &&
+                            (context.Request.Path.StartsWithSegments("/Orders") ||
+                             context.Request.Path.StartsWithSegments("/Constructor") ||
+                             context.Request.Path.StartsWithSegments("/AdminOrders") ||
+                             context.Request.Path.StartsWithSegments("/Account/Profile")))
+                        {
+                            context.HandleResponse();
+                            var returnUrl = context.Request.Path + context.Request.QueryString;
+                            context.Response.Redirect("/Account/Login?returnUrl=" + Uri.EscapeDataString(returnUrl));
+                        }
+                        return Task.CompletedTask;
                     }
                 };
             });

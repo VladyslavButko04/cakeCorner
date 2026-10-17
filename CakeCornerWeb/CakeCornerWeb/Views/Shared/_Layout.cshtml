@@ -43,18 +43,56 @@
                                 var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
                             }
                             <a href="/Cake" class="@(currentController == "Cake" && currentAction == "Index" ? "active" : "")">Готові рішення</a>
-                            <a href="/Cake/Constructor" class="@(currentController == "Cake" && currentAction == "Constructor" ? "active" : "")">Конструктор тортів</a>
+                            <a asp-controller="Constructor" asp-action="Index" class="@(currentController == "Constructor" ? "active" : "")">Конструктор тортів</a>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a asp-controller="Orders" asp-action="Index">Мої замовлення</a>
+                                @if(User.IsInRole("Admin")){<a asp-controller="AdminOrders" asp-action="Index">Адмін-панель</a>}
+                            }
                         </nav>
                         <div class="header-icons">
-                            <a href="/Home/Search">
-                                <img src="~/images/header/search.svg" alt="Пошук" class="search-icon" />
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#searchModal">
+                                <img src="~/images/header/search.svg" alt="Пошук" class="search-icon" style="cursor: pointer;" />
                             </a>
-                            <a href="/Home/Cart">
-                                <img src="~/images/header/cart.svg" alt="Кошик" class="cart-icon" />
+                            <a asp-controller="Cart" asp-action="Index">
+                                <img src="~/images/header/cart.svg" alt="Пошук" class="search-icon" />
                             </a>
-                            <a href="/Account/Login">
+                            <a href="@(User.Identity?.IsAuthenticated == true ? "/Account/Profile" : "/Account/Login")">
                                 <img src="~/images/header/login.svg" alt="Увійти" class="login-icon" />
                             </a>
+                            @if(User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0 p-0">
+                                    <button type="submit" class="logout-btn">Вийти</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content border-0 bg-transparent">
+
+                        <div class="modal-body position-relative p-0">
+                            <button type="button" class="btn-close btn-close-white position-absolute"
+                                    data-bs-dismiss="modal" aria-label="Закрити"
+                                    style="top: -30px; right: 0; z-index: 1060;"></button>
+
+                            <form asp-controller="Cake" asp-action="Search" method="get" id="searchForm" class="bg-white p-4 rounded-4 shadow-lg w-100">
+                                <h5 class="mb-3 text-primary">Що ви шукаєте?</h5>
+
+                                <div class="input-group input-group-lg mb-1 position-relative">
+                                    <input type="search" name="query" id="searchInput" class="form-control border-primary"
+                                           placeholder="Введіть назву торта (напр. 'Наполеон')" autocomplete="off" required>
+                                    <button class="btn btn-primary px-4" type="submit">Знайти</button>
+                                </div>
+
+                                <ul class="list-group position-absolute w-100 shadow" id="searchResultsContainer"
+                                    style="display: none; z-index: 1050; max-height: 350px; overflow-y: auto; left: 0; top: 100%;">
+                                </ul>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -73,7 +111,7 @@
                     <ul>
                         <li><a href="#">Про нас</a></li>
                         <li><a href="/Cake/Index">Готові рішення</a></li>
-                        <li><a href="/Cake/CustomCake">Конструктор тортів</a></li>
+                        <li><a asp-controller="Constructor" asp-action="Index">Конструктор тортів</a></li>
                     </ul>
                 </div>
                
@@ -99,5 +137,78 @@
 </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const searchModalEl = document.getElementById("searchModal");
+                const searchInput = document.getElementById("searchInput");
+                const resultsContainer = document.getElementById("searchResultsContainer");
+                let timeoutId;
+
+                searchModalEl.addEventListener("shown.bs.modal", function () {
+                    searchInput.focus();
+                });
+
+                searchModalEl.addEventListener("hidden.bs.modal", function () {
+                    searchInput.value = "";
+                    resultsContainer.style.display = "none";
+                    resultsContainer.innerHTML = "";
+                });
+
+                searchInput.addEventListener("input", function (e) {
+                    const query = e.target.value.trim();
+
+                    if (query.length < 2) {
+                        resultsContainer.style.display = "none";
+                        resultsContainer.innerHTML = "";
+                        return;
+                    }
+
+                    clearTimeout(timeoutId);
+
+                    timeoutId = setTimeout(() => {
+                        fetch(`/Cake/LiveSearch?query=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                resultsContainer.innerHTML = "";
+
+                                if (data.length > 0) {
+                                    data.forEach(cake => {
+                                        const li = document.createElement("li");
+                                        li.className = "list-group-item list-group-item-action d-flex align-items-center";
+                                        li.style.cursor = "pointer";
+
+                                        li.onclick = function() {
+                                            window.location.href = `/Cake/Details/${cake.id}`;
+                                        };
+
+                                        li.innerHTML = `
+                                            <img src="${cake.image}" alt="${cake.name}" class="me-3 rounded" style="width: 45px; height: 45px; object-fit: cover;">
+                                            <span class="fs-5">${cake.name}</span>
+                                        `;
+                                        resultsContainer.appendChild(li);
+                                    });
+                                    resultsContainer.style.display = "block";
+                                } else {
+                                    resultsContainer.innerHTML = `<li class="list-group-item text-muted">Тортів не знайдено...</li>`;
+                                    resultsContainer.style.display = "block";
+                                }
+                            })
+                            .catch(error => console.error('Помилка пошуку:', error));
+                    }, 300);
+                });
+
+                document.addEventListener("click", function(event) {
+                    if (!searchInput.contains(event.target) && !resultsContainer.contains(event.target)) {
+                        resultsContainer.style.display = "none";
+                    }
+                });
+
+                searchInput.addEventListener("focus", function() {
+                    if (resultsContainer.children.length > 0) {
+                        resultsContainer.style.display = "block";
+                    }
+                });
+            });
+    </script>
 </body>
 </html>

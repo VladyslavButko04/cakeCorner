@@ -6,6 +6,7 @@ namespace CakeCornerWeb.Models
     {
         public int? CategoryId { get; set; }
         public int? FlavorId { get; set; }
+        public string? Search { get; set; }
         public List<SelectListItem> Categories { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Flavors { get; set; } = new List<SelectListItem>();
     }

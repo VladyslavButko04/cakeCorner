@@ -8,6 +8,8 @@
         public DateTime? UpdatedAt { get; set; }
         public Person Person { get; set; } = null!;
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public List<CustomCakeCart> CustomItems { get; set; } = [];
         public static Cart Create(int personId)
         {
             return new Cart
