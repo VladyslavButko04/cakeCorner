@@ -1,0 +1,21 @@
+﻿@model CakeCornerWeb.Models.CustomCakeImageCards
+@using CakeCornerWeb.Services
+
+<div class="ingredient-card-stack @(Model.Compact ? "ingredient-card-stack--compact" : "")" 
+     data-interactive="@(Model.Interactive ? "true" : "false")" 
+     role="group" 
+     aria-label="Склад торта: бісквіт, крем і начинка">
+    @foreach (var card in Model.Cards)
+    {
+        <figure class="ingredient-image-card" data-slot="@card.Slot">
+            <img src="@Url.Content("~" + card.ImagePath)" 
+                 alt="@card.Label" 
+                 loading="lazy" 
+                 width="144" 
+                 height="120" 
+                 data-ingredient-image 
+                 data-fallback="@Url.Content("~" + IngredientImageService.Placeholder)" />
+            <figcaption>@card.Label</figcaption>
+        </figure>
+    }
+</div>

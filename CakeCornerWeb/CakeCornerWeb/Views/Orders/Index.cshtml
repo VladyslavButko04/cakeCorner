@@ -1,5 +1,6 @@
 ﻿@model OrderListPage
 @using CakeCornerWeb.Services
+@inject CakeCornerWeb.Services.IngredientImageService IngredientImages
 @{
     ViewData["Title"] = Model.IsAdmin ? "Обробка замовлень" : "Мої замовлення";
 }
@@ -42,7 +43,14 @@ else
                 @foreach (var order in Model.Orders)
                 {
                     <tr>
-                        <td>#@order.Order_ID</td>
+                        <td>#@order.Order_ID
+                            <div class="order-custom-previews">
+                            @foreach (var item in order.CustomItems)
+                            {
+                                @await Html.PartialAsync("_CustomCakeImages", CustomCakeImageCards.ForItem(item, IngredientImages, compact: true))
+                            }
+                            </div>
+                        </td>
                         <td>@OrderService.InKyiv(order.CreatedAt).ToString("dd.MM.yyyy HH:mm")</td>
                         @if (Model.IsAdmin)
                         {

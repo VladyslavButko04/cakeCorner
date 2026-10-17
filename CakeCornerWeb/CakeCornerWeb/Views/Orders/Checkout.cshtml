@@ -1,4 +1,5 @@
 ﻿@model CheckoutPage
+@inject CakeCornerWeb.Services.IngredientImageService IngredientImages
 @{ ViewData["Title"] = "Оформлення замовлення"; }
 <div class="container my-5">
     <h2 class="mb-4">Оформлення замовлення</h2>
@@ -56,6 +57,7 @@
                 @foreach(var item in Model.Cart.CustomItems)
                 {
                     <div class="mb-3"><strong>Кастомний торт</strong>
+                        @await Html.PartialAsync("_CustomCakeImages", CustomCakeImageCards.ForItem(item, IngredientImages, compact: true))
                         <div>@item.CustomCake.Weight кг × @item.Quantity</div>
                         <small>@item.CustomCake.ConfigurationDescription</small>
                         @if(!string.IsNullOrWhiteSpace(item.CustomCake.Inscription)){<p>Напис: @item.CustomCake.Inscription</p>}

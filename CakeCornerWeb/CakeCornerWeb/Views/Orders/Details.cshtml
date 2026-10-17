@@ -1,5 +1,6 @@
 ﻿@model OrderDetailsPage
 @using CakeCornerWeb.Services
+@inject CakeCornerWeb.Services.IngredientImageService IngredientImages
 @{ var order = Model.Order; ViewData["Title"] = $"Замовлення #{order.Order_ID}"; var version = Convert.ToBase64String(order.RowVersion); }
 <h1>Замовлення #@order.Order_ID</h1>
 @if(TempData["OrderSuccess"] is string success){<p class="alert alert-success" role="status">@success</p>}
@@ -16,7 +17,9 @@
         @foreach(var item in order.Items)
         {<tr><td>@(item.CakeNameSnapshot ?? item.CakeWeight.Cake.CakeName)</td><td>@(item.WeightSnapshot ?? item.CakeWeight.WeightOption.Weight) кг</td><td>@item.Quantity</td><td>@item.ItemPrice.ToString("0.00") грн</td><td>@((item.ItemPrice * item.Quantity).ToString("0.00")) грн</td></tr>}
         @foreach(var item in order.CustomItems)
-        {<tr><td><strong>Кастомний торт</strong><p>@(item.DescriptionSnapshot ?? item.CustomCake.ConfigurationDescription)</p></td><td>@(item.WeightSnapshot ?? item.CustomCake.Weight) кг</td><td>@item.Quantity</td><td>@item.UnitPrice.ToString("0.00") грн</td><td>@((item.UnitPrice * item.Quantity).ToString("0.00")) грн</td></tr>}
+        {<tr><td class="custom-cake-summary"><strong>Кастомний торт</strong>
+            @await Html.PartialAsync("_CustomCakeImages", CustomCakeImageCards.ForItem(item, IngredientImages))
+            <p>@(item.DescriptionSnapshot ?? item.CustomCake.ConfigurationDescription)</p></td><td>@(item.WeightSnapshot ?? item.CustomCake.Weight) кг</td><td>@item.Quantity</td><td>@item.UnitPrice.ToString("0.00") грн</td><td>@((item.UnitPrice * item.Quantity).ToString("0.00")) грн</td></tr>}
     </tbody></table>
 </div>
 <h3>Разом: @order.TotalPrice.ToString("0.00") грн</h3>
