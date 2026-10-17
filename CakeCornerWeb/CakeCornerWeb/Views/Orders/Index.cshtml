@@ -1,21 +1,73 @@
-﻿@{
-    ViewData["Title"] = "Мої замовлення";
+﻿@model OrderListPage
+@using CakeCornerWeb.Services
+@{
+    ViewData["Title"] = Model.IsAdmin ? "Обробка замовлень" : "Мої замовлення";
 }
-
-<div class="container my-5">
-    @if (TempData["SuccessMessage"] is string message)
-    {
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-            @message
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-    <h2 class="mb-4">Історія замовлень</h2>
-
-    <div class="alert alert-info">
-        Тут відображатиметься список ваших замовлень.
+<h1>@ViewData["Title"]</h1>
+@if (Model.IsAdmin)
+{
+    <form method="get" class="mb-3">
+        <label for="status">Статус</label>
+        <select id="status" name="status" class="form-select d-inline-block w-auto">
+            <option value="">Усі статуси</option>
+            @foreach (var status in OrderWorkflow.Labels)
+            {
+                <option value="@status.Key" selected="@(Model.Status == status.Key)">@status.Value</option>
+            }
+        </select>
+        <button class="btn btn-outline-primary" type="submit">Показати</button>
+    </form>
+}
+else
+{
+    <div class="mb-3">
+        <a asp-action="Index" asp-route-scope="all" class="btn @(Model.Scope == "all" ? "btn-primary" : "btn-outline-primary")">Історія всіх замовлень</a>
+        <a asp-action="Index" asp-route-scope="active" class="btn @(Model.Scope == "active" ? "btn-primary" : "btn-outline-primary")">Поточні</a>
+        <a asp-action="Index" asp-route-scope="completed" class="btn @(Model.Scope == "completed" ? "btn-primary" : "btn-outline-primary")">Завершені та скасовані</a>
     </div>
-
-    <a asp-controller="Cake" asp-action="Index" class="btn btn-outline-primary">Перейти до каталогу тортів</a>
-</div>
+}
+@if (!Model.Orders.Any())
+{
+    <p class="alert alert-info">Замовлень поки немає.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Номер</th><th>Створено (Київ)</th>@if(Model.IsAdmin){
+                <th>Клієнт</th>
+            }
+            <th>Статус</th><th>Сума</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr>
+                        <td>#@order.Order_ID</td>
+                        <td>@OrderService.InKyiv(order.CreatedAt).ToString("dd.MM.yyyy HH:mm")</td>
+                        @if (Model.IsAdmin)
+                        {
+                            <td>@order.Person.Name</td>
+                        }
+                        <td>@OrderWorkflow.Label(order.Status.Code)</td>
+                        <td>@order.TotalPrice.ToString("0.00") грн</td>
+                        <td><a asp-controller="@(Model.IsAdmin ? "AdminOrders" : "Orders")" asp-action="Details" asp-route-id="@order.Order_ID">Переглянути</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+<nav aria-label="Сторінки замовлень">
+    @if (Model.Page > 1)
+    {
+        <a asp-action="Index" asp-route-page="@(Model.Page - 1)" asp-route-scope="@Model.Scope" asp-route-status="@Model.Status" class="btn btn-outline-secondary">Назад</a>
+    }
+    @if (Model.TotalPages > 0)
+    {
+        <span>Сторінка @Model.Page з @Model.TotalPages</span>
+    }
+    @if (Model.Page < Model.TotalPages)
+    {
+        <a asp-action="Index" asp-route-page="@(Model.Page + 1)" asp-route-scope="@Model.Scope" asp-route-status="@Model.Status" class="btn btn-outline-secondary">Далі</a>
+    }
+</nav>

@@ -49,7 +49,7 @@ namespace CakeCornerWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddToCartRequest request)
         {
-            var userId = GetCurrentUserId();    
+            var userId = GetCurrentUserId();
             if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
@@ -57,10 +57,10 @@ namespace CakeCornerWeb.Controllers
 
             if (!ModelState.IsValid)
                 return InvalidQuantity();
-            
+
 
             var result = await _cartService.AddToCartAsync(userId.Value, request.CakeWeightId, request.Quantity);
-            return OperationResult(result); 
+            return OperationResult(result);
         }
 
         [HttpPost]
@@ -72,8 +72,8 @@ namespace CakeCornerWeb.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            if (!ModelState.IsValid || request.CartItemId <= 0)
-                return BadRequest();
+            if (!ModelState.IsValid)
+                return InvalidQuantity();
 
             var result = await _cartService.UpdateQuantityAsync(userId.Value, request.CartItemId, request.Quantity);
             return OperationResult(result);
@@ -100,7 +100,7 @@ namespace CakeCornerWeb.Controllers
             {
                 return RedirectToAction("Login", "Account");
             }
-            if (cartItemId <= 0)
+            if (!ModelState.IsValid || cartItemId <= 0)
             {
                 return BadRequest();
             }

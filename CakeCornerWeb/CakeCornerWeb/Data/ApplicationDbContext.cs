@@ -1,5 +1,6 @@
 ﻿using CakeCornerWeb.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Security.AccessControl;
 
 namespace CakeCornerWeb.Data
 {
@@ -17,9 +18,21 @@ namespace CakeCornerWeb.Data
         public DbSet<Flavor> Flavors { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<PersonOrder> Orders => Set<PersonOrder>();
+        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+        public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
+        public DbSet<OrderStatusHistory> OrderHistory => Set<OrderStatusHistory>();
+        public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<PickupLocation> PickupLocations => Set<PickupLocation>();
+        public DbSet<City> Cities => Set<City>();
+        public DbSet<Ingredient> Ingredients => Set<Ingredient>();
+        public DbSet<IngredientType> IngredientTypes => Set<IngredientType>();
+        public DbSet<CustomCake> CustomCakes => Set<CustomCake>();
+        public DbSet<CustomCakeCart> CustomCartItems => Set<CustomCakeCart>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            OrderModelConfiguration.Configure(modelBuilder);
 
             // Person
             modelBuilder.Entity<Person>().ToTable("Person").HasKey(c => c.Person_ID);

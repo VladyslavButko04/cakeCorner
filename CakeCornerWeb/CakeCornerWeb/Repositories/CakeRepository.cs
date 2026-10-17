@@ -24,7 +24,7 @@ public class CakeRepository : ICakeRepository
     }
 
 
-    public async Task<List<Cake>> GetFilteredCakeAsync(int? categoryId, int? flavorId)
+    public async Task<List<Cake>> GetFilteredCakeAsync(int? categoryId, int? flavorId, string? search = null)
     {
         var query = _context.Cakes
             .Include(c => c.Category)
@@ -39,6 +39,8 @@ public class CakeRepository : ICakeRepository
         if (flavorId.HasValue)
             query = query.Where(c => c.Flavor_ID == flavorId);
 
+        if (!string.IsNullOrWhiteSpace(search))
+            query = query.Where(c => c.CakeName.Contains(search) || c.DescriptionShort.Contains(search) || c.DescriptionLong.Contains(search));
         return await query.ToListAsync();
     }
 

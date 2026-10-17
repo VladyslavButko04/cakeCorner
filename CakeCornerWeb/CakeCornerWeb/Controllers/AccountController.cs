@@ -114,13 +114,13 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Profile()
     {
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
-        if (string.IsNullOrEmpty(email))
+        var personId = User.PersonId();
+        if (personId == null)
         {
-            return RedirectToAction("Profile", "Account");
+            return RedirectToAction("Login", "Account");
         }
 
-        var person = await _personService.GetProfileAsync(email);
+        var person = await _context.Persons.AsNoTracking().SingleOrDefaultAsync(p => p.Person_ID == personId);
         if (person == null)
         {
             return NotFound("Користувач не знайдений.");

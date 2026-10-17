@@ -2,20 +2,25 @@
 
 @{
     ViewData["Title"] = "Кошик";
-    var totalAmount = Model.CartItems.Sum(i => i.Price * i.Quantity);
+    var totalAmount = Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.CustomItems.Sum(i => i.UnitPrice * i.Quantity);
 }
 
 <div class="container my-4">
     <h2>Ваш кошик</h2>
+
+    @if (TempData["CartSuccess"] is string success)
+    {
+        <div class="alert alert-success" role="status">@success</div>
+    }
 
      @if (TempData["CartError"] is string error)
     {
         <div class="alert alert-danger" role="alert">@error</div>
     }
 
-    <p class="text-muted">Ціни готових тортів оновлюються з каталогу.</p>
+    <p class="text-muted">Ціни готових тортів оновлюються з каталогу. Ціна кастомного торта розраховується при додаванні конфігурації.</p>
 
-    @if (!Model.CartItems.Any())
+    @if (!Model.CartItems.Any() && !Model.CustomItems.Any())
     {
         <div class="alert alert-info mt-3">
             Ваш кошик порожній. <a asp-controller="Cake" asp-action="Index">Перейти до вибору тортів</a>.
@@ -61,7 +66,22 @@
                         </td>
                     </tr>
                 }
-                
+                @foreach (var item in Model.CustomItems)
+                {
+                    <tr>
+                        <td><strong>Кастомний торт</strong><p>@item.CustomCake.ConfigurationDescription</p>@if(!string.IsNullOrWhiteSpace(item.CustomCake.Inscription)){<p>Напис: @item.CustomCake.Inscription</p>}</td>
+                        <td>@item.CustomCake.Weight кг</td><td>@item.UnitPrice.ToString("0.00") грн</td>
+                        <td>
+                            <form asp-controller="Constructor" asp-action="UpdateQuantity" method="post" class="d-flex gap-2">
+                                <input type="hidden" name="cartItemId" value="@item.CustomCakeCart_ID" />
+                                <input type="number" name="quantity" value="@item.Quantity" min="1" max="@CartLimits.MaxQuantity" required class="form-control" aria-label="Кількість кастомних тортів" />
+                                <button class="btn btn-outline-primary btn-sm" type="submit">Оновити</button>
+                            </form>
+                        </td>
+                        <td>@((item.UnitPrice * item.Quantity).ToString("0.00")) грн</td>
+                        <td><form asp-controller="Constructor" asp-action="Remove" method="post"><input type="hidden" name="cartItemId" value="@item.CustomCakeCart_ID" /><button class="btn btn-outline-danger btn-sm" type="submit">Видалити</button></form></td>
+                    </tr>
+                }
             </tbody>
         </table>
 
