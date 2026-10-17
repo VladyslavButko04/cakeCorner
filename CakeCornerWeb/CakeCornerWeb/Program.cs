@@ -26,6 +26,7 @@ builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<CustomCakeService>();
+builder.Services.AddSingleton<IngredientImageService>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, CurrentAdminHandler>();
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);

@@ -1,5 +1,18 @@
 ﻿@model ConstructorPage
-@{ ViewData["Title"] = "Конструктор тортів"; }
+@inject CakeCornerWeb.Services.IngredientImageService IngredientImages
+@{
+    ViewData["Title"] = "Конструктор тортів";
+    string SelectedImage(int id, string type) => IngredientImages.ForIngredient(Model.Ingredients.FirstOrDefault(i => i.Ingredients_ID == id), type);
+    var preview = new CustomCakeImageCards
+    {
+        Interactive = true,
+        Cards = new[] {
+            new IngredientImageCard("Biscuit", "Бісквіт", SelectedImage(Model.Request.BiscuitId, "Biscuit")),
+            new IngredientImageCard("Cream", "Крем", SelectedImage(Model.Request.CreamId, "Cream")),
+            new IngredientImageCard("Filling", "Начинка", SelectedImage(Model.Request.FillingId, "Filling"))
+        }
+    };
+}
 <div class="container mt-5">
     <h2 class="mb-3 text-primary">Створіть свій унікальний торт</h2>
     <p class="text-muted mb-4">Оберіть склад, вагу й оформлення. Ваші побажання будуть збережені разом із замовленням.</p>
@@ -25,8 +38,9 @@
                                 <select name="Request.@slot.Item1" id="@slot.Item1" class="form-select component" required>
                                     <option value="">Оберіть компонент</option>
                                     @foreach(var ingredient in Model.Ingredients.Where(i => i.Type.IngredientsTypesName == slot.Item2))
-                                    {<option value="@ingredient.Ingredients_ID" selected="@(slot.Item4 == ingredient.Ingredients_ID)" data-price="@ingredient.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">@ingredient.IngredientName — @ingredient.Price.ToString("0.00") грн/кг</option>}
+                                    {<option value="@ingredient.Ingredients_ID" selected="@(slot.Item4 == ingredient.Ingredients_ID)" data-image="@Url.Content("~" + IngredientImages.ForIngredient(ingredient, slot.Item2))" data-price="@ingredient.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)">@ingredient.IngredientName — @ingredient.Price.ToString("0.00") грн/кг</option>}
                                 </select>
+                                <img id="preview-@slot.Item1" alt="@slot.Item3" width="100" height="80" class="mt-2 ingredient-choice-preview" data-ingredient-image data-fallback="@Url.Content("~" + CakeCornerWeb.Services.IngredientImageService.Placeholder)" hidden />
                             </div>
                         }
                     </div>
@@ -42,6 +56,7 @@
             <div class="col-lg-5">
                 <div class="card border-primary sticky-top" style="top:30px"><div class="card-body">
                     <h4 class="card-title text-center mb-4">Попередній розрахунок</h4>
+                    @await Html.PartialAsync("_CustomCakeImages", preview)
                     <p>Рекомендована вага за кількістю гостей: <strong id="recommendedWeight">—</strong></p>
                     <p>Сума: <strong class="text-primary" id="customTotal">—</strong></p>
                     <p class="text-muted small">Ціна одного торта = сума тарифів обраних компонентів за кг × вага. Розрахунок не враховує додаткових платних послуг.</p>
@@ -61,6 +76,15 @@
             const guests = Number(guestInput.value);
             document.getElementById('recommendedWeight').textContent = guests > 0 ? Math.max(0.5, Math.min(10, guests * 0.2)).toFixed(1) + ' кг' : '—';
             const selects = Array.from(form.querySelectorAll('.component'));
+            for (const select of selects) {
+                const preview = document.getElementById('preview-' + select.id);
+                const path = select.selectedOptions[0]?.dataset.image;
+                const valid = path && /^\/(?!\/)/.test(path) && !path.includes('..');
+                preview.hidden = !valid;
+                if (valid) preview.src = path; else preview.removeAttribute('src');
+                const card = form.querySelector('[data-interactive="true"] [data-slot="' + select.id.replace(/Id$/, '') + '"] img');
+                if (card) card.src = valid ? path : card.dataset.fallback;
+            }
             if (selects.some(s => !s.value)) { document.getElementById('customTotal').textContent = '—'; return; }
             const rate = selects.reduce((sum, s) => sum + Number(s.selectedOptions[0].dataset.price), 0);
             const total = Math.round((rate * Number(weightInput.value) + Number.EPSILON) * 100) / 100 * Number(document.getElementById('Request_Quantity').value);

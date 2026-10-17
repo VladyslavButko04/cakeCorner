@@ -1,4 +1,5 @@
 ﻿@model CakeCornerWeb.Models.Entities.Cart
+@inject CakeCornerWeb.Services.IngredientImageService IngredientImages
 
 @{
     ViewData["Title"] = "Кошик";
@@ -28,6 +29,7 @@
     }
     else
     {
+        <div class="table-responsive">
         <table class="table align-middle mt-3">
             <thead>
                 <tr>
@@ -69,7 +71,12 @@
                 @foreach (var item in Model.CustomItems)
                 {
                     <tr>
-                        <td><strong>Кастомний торт</strong><p>@item.CustomCake.ConfigurationDescription</p>@if(!string.IsNullOrWhiteSpace(item.CustomCake.Inscription)){<p>Напис: @item.CustomCake.Inscription</p>}</td>
+                        <td class="custom-cake-summary">
+                            <strong>Кастомний торт</strong>
+                            @await Html.PartialAsync("_CustomCakeImages", CustomCakeImageCards.ForItem(item, IngredientImages))
+                            <p>@item.CustomCake.ConfigurationDescription</p>
+                            @if(!string.IsNullOrWhiteSpace(item.CustomCake.Inscription)){<p>Напис: @item.CustomCake.Inscription</p>}
+                        </td>
                         <td>@item.CustomCake.Weight кг</td><td>@item.UnitPrice.ToString("0.00") грн</td>
                         <td>
                             <form asp-controller="Constructor" asp-action="UpdateQuantity" method="post" class="d-flex gap-2">
@@ -84,10 +91,11 @@
                 }
             </tbody>
         </table>
+        </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mt-4">
             <h4>Разом: <strong>@totalAmount.ToString("0.00") грн</strong></h4>
-            <div>
+            <div class="cart-actions">
                 <form asp-controller="Cart" asp-action="Clear" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-secondary me-2">Очистити</button>
                 </form>

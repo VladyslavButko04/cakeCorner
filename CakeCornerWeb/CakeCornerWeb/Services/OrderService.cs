@@ -144,7 +144,11 @@ public class OrderService(ApplicationDbContext context)
 
     public async Task<OrderListPage> ListAsync(int? personId, bool history, string? status, int page, bool includeAll = false)
     {
-        var query = context.Orders.AsNoTracking().Include(o => o.Status).Include(o => o.Person).AsQueryable();
+        var query = context.Orders.AsNoTracking().Include(o => o.Status).Include(o => o.Person)
+            .Include(o => o.CustomItems).ThenInclude(i => i.CustomCake).ThenInclude(c => c.Biscuit)
+            .Include(o => o.CustomItems).ThenInclude(i => i.CustomCake).ThenInclude(c => c.Cream)
+            .Include(o => o.CustomItems).ThenInclude(i => i.CustomCake).ThenInclude(c => c.Filling)
+            .AsSplitQuery();
         if (personId != null) query = query.Where(o => o.Person_ID == personId);
         if (history) query = query.Where(o => OrderWorkflow.Terminal.Contains(o.Status.Code!));
         else if (personId != null && !includeAll) query = query.Where(o => !OrderWorkflow.Terminal.Contains(o.Status.Code!));
