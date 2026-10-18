@@ -1,0 +1,11 @@
+<nav class="d-flex flex-wrap gap-2 mb-4" aria-label="Адміністрування">
+    <a asp-controller="AdminCatalog" asp-action="Index" class="btn btn-outline-secondary">Адмін-панель</a>
+    <a asp-controller="AdminOrders" asp-action="Index" class="btn btn-outline-primary">Замовлення</a>
+    <a asp-controller="AdminCakes" asp-action="Index" class="btn btn-outline-primary">Торти</a>
+    <a asp-controller="AdminIngredients" asp-action="Index" class="btn btn-outline-primary">Інгредієнти</a>
+    <a asp-controller="AdminCatalog" asp-action="Options" class="btn btn-outline-primary">Категорії, смаки та вага</a>
+</nav>
+@if (TempData["CatalogSuccess"] is string success)
+{ <p class="alert alert-success" role="status">@success</p> }
+@if (TempData["CatalogError"] is string error)
+{ <p class="alert alert-danger" role="alert">@error</p> }

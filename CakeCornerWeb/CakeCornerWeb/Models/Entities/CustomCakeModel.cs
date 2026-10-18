@@ -9,6 +9,8 @@ public class IngredientType
 public class Ingredient
 {
     public int Ingredients_ID { get; set; }
+    public bool IsActive { get; set; } = true;
+    public byte[] RowVersion { get; set; } = [];
     public int IngredientTypes_ID { get; set; }
     public string? IngredientName { get; set; }
     public decimal Price { get; set; }

@@ -62,7 +62,18 @@ public static class OrderModelConfiguration
 
         model.Entity<IngredientType>().ToTable("IngredientTypes").HasKey(t => t.IngredientsTypes_ID);
         model.Entity<IngredientType>().Property(t => t.IngredientsTypesName).HasMaxLength(20);
+        model.Entity<Cake>().Property(c => c.IsActive).HasDefaultValue(true);
+        model.Entity<Cake>().Property(c => c.RowVersion).IsRowVersion();
+        model.Entity<Cake>().Property(c => c.CakeName).HasMaxLength(100);
+        model.Entity<Cake>().Property(c => c.DescriptionShort).HasMaxLength(300);
+        model.Entity<Cake>().Property(c => c.DescriptionLong).HasMaxLength(4000);
+        model.Entity<Cake>().Property(c => c.ImagePath).HasMaxLength(255);
+        model.Entity<Category>().Property(c => c.CategoryName).HasMaxLength(100);
+        model.Entity<Flavor>().Property(c => c.FlavorName).HasMaxLength(100);
+        model.Entity<CakeWeight>().Property(w => w.IsActive).HasDefaultValue(true);
         var ingredient = model.Entity<Ingredient>();
+        ingredient.Property(i => i.IsActive).HasDefaultValue(true);
+        ingredient.Property(i => i.RowVersion).IsRowVersion();
         ingredient.ToTable("Ingredient").HasKey(i => i.Ingredients_ID);
         ingredient.Property(i => i.IngredientName).HasMaxLength(100);
         ingredient.Property(i => i.IngredientDescription).HasMaxLength(255);

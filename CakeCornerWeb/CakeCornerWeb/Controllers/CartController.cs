@@ -114,8 +114,15 @@ namespace CakeCornerWeb.Controllers
             CartOperationResult.Success => RedirectToAction("Index"),
             CartOperationResult.NotFound => NotFound(),
             CartOperationResult.InvalidQuantity => InvalidQuantity(),
+            CartOperationResult.Unavailable => Unavailable(),
             _ => throw new ArgumentOutOfRangeException(nameof(result))
         };
+
+        private IActionResult Unavailable()
+        {
+            TempData["CartError"] = "Цей торт або ваговий варіант більше недоступний. Видаліть його з кошика.";
+            return RedirectToAction(nameof(Index));
+        }
 
         private IActionResult InvalidQuantity()
         {

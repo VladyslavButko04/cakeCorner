@@ -13,9 +13,9 @@ public class OrderService(ApplicationDbContext context)
         var contents = new
         {
             Ready = cart.CartItems.OrderBy(i => i.CartItem_ID).Select(i => new
-            { i.CartItem_ID, i.CakeWeight_ID, i.Quantity, i.CakeWeight.Price, i.CakeWeight.Cake.CakeName, i.CakeWeight.WeightOption.Weight }),
+            { i.CartItem_ID, i.CakeWeight_ID, i.Quantity, i.CakeWeight.Price, i.CakeWeight.Cake.CakeName, i.CakeWeight.WeightOption.Weight, CakeActive = i.CakeWeight.Cake.IsActive, VariantActive = i.CakeWeight.IsActive }),
             Custom = cart.CustomItems.OrderBy(i => i.CustomCakeCart_ID).Select(i => new
-            { i.CustomCakeCart_ID, i.Quantity, i.CustomCake.Price, i.CustomCake.Weight, i.CustomCake.ConfigurationDescription, i.CustomCake.Inscription })
+            { i.CustomCakeCart_ID, i.Quantity, i.CustomCake.Price, i.CustomCake.Weight, i.CustomCake.ConfigurationDescription, i.CustomCake.Inscription, Available = CatalogAvailability.IsAvailable(i.CustomCake) })
         };
         return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
             System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(contents)));
@@ -63,6 +63,7 @@ public class OrderService(ApplicationDbContext context)
         Validator.ValidateObject(request, new ValidationContext(request), true);
         if (request.CheckoutToken == Guid.Empty) throw new OrderRuleException("Оновіть сторінку оформлення.");
         await using var transaction = await context.Database.BeginTransactionAsync();
+        await SqlServerLocks.AcquireAsync(context, CatalogAvailability.LockResource, shared: true);
         await SqlServerLocks.AcquireAsync(context, $"CakeCorner:Cart:{personId}");
         var previous = await context.Orders.SingleOrDefaultAsync(o => o.Person_ID == personId && o.CheckoutToken == request.CheckoutToken);
         if (previous != null) return previous.Order_ID;
@@ -81,6 +82,9 @@ public class OrderService(ApplicationDbContext context)
             .Where(i => i.Cart.Person_ID == personId).ToListAsync();
         var custom = await new CustomCakeService(context).Query().AsNoTracking()
             .Where(i => i.Order_ID == null && i.CustomCake.Person_ID == personId).ToListAsync();
+        if (ready.Any(i => !i.CakeWeight.IsActive || !i.CakeWeight.Cake.IsActive) ||
+            custom.Any(i => !CatalogAvailability.IsAvailable(i.CustomCake)))
+            throw new OrderRuleException("Деякі торти або інгредієнти більше недоступні. Видаліть ці позиції з кошика.");
         if (ready.Count == 0 && custom.Count == 0) throw new OrderRuleException("Кошик порожній.");
         if (request.CartFingerprint != Fingerprint(new Cart { CartItems = ready, CustomItems = custom }))
             throw new OrderRuleException("Склад або ціни кошика змінилися. Перевірте замовлення та підтвердьте його повторно.");

@@ -2,6 +2,7 @@
 @using CakeCornerWeb.Services
 @inject CakeCornerWeb.Services.IngredientImageService IngredientImages
 @{ var order = Model.Order; ViewData["Title"] = $"Замовлення #{order.Order_ID}"; var version = Convert.ToBase64String(order.RowVersion); }
+@if (Model.IsAdmin) { @await Html.PartialAsync("_AdminNavigation") }
 <h1>Замовлення #@order.Order_ID</h1>
 @if(TempData["OrderSuccess"] is string success){<p class="alert alert-success" role="status">@success</p>}
 @if(TempData["OrderError"] is string error){<p class="alert alert-danger" role="alert">@error</p>}

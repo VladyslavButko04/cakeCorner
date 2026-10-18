@@ -1,0 +1,53 @@
+﻿@model CakeEditorPage
+@{ ViewData["Title"] = Model.Id == null ? "Новий торт" : "Редагування торта"; }
+@await Html.PartialAsync("_AdminNavigation")
+<h1>@ViewData["Title"]</h1>
+<form asp-action="@(Model.Id == null ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="mb-4">
+    <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+    <input asp-for="Request.RowVersion" type="hidden" />
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="mb-3"><label asp-for="Request.Name" class="form-label"></label><input asp-for="Request.Name" class="form-control" maxlength="100" /><span asp-validation-for="Request.Name" class="text-danger"></span></div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6"><label asp-for="Request.CategoryId" class="form-label"></label><select asp-for="Request.CategoryId" asp-items="Model.Categories" class="form-select"><option value="">Оберіть категорію</option></select></div>
+                <div class="col-md-6"><label asp-for="Request.FlavorId" class="form-label"></label><select asp-for="Request.FlavorId" asp-items="Model.Flavors" class="form-select"><option value="">Оберіть смак</option></select></div>
+            </div>
+            <p class="small"><a asp-controller="AdminCatalog" asp-action="Options" target="_blank" rel="noopener">Додати категорію, смак або вагу</a>. Після додавання оновіть форму, попередньо зберігши введені дані.</p>
+            <div class="mb-3"><label asp-for="Request.ShortDescription" class="form-label"></label><textarea asp-for="Request.ShortDescription" class="form-control" rows="2" maxlength="300"></textarea></div>
+            <div class="mb-3"><label asp-for="Request.Description" class="form-label"></label><textarea asp-for="Request.Description" class="form-control" rows="6" maxlength="4000"></textarea></div>
+        </div>
+        <div class="col-lg-4">
+            @if (!string.IsNullOrWhiteSpace(Model.ImagePath)) { <img src="@Url.Content(Model.ImagePath)" alt="Поточне фото торта" class="img-fluid rounded mb-3" style="max-height:260px" /> }
+            <label asp-for="Request.Image" class="form-label">Фотографія торта</label>
+            <input asp-for="Request.Image" type="file" accept="image/jpeg,image/png,image/webp" required="@(Model.Id == null)" class="form-control" />
+            <p class="small text-muted mt-2">JPEG, PNG або WebP, до 5 МБ. Для нового торта фото обов'язкове. Під час редагування можна залишити поточне.</p>
+            <p class="small text-muted">Якщо форма повернулась з помилкою, новий файл потрібно обрати повторно.</p>
+        </div>
+    </div>
+    <h2 class="h4 mt-3">Вага та ціна</h2><p>Увімкніть щонайменше один варіант. Ціна вказується за один торт цієї ваги.</p>
+    <div class="table-responsive"><table class="table"><thead><tr><th>Продавати</th><th>Вага</th><th>Ціна, грн</th></tr></thead><tbody>
+    @for(var i = 0; i < Model.Request.Variants.Count; i++)
+    {
+        var variant = Model.Request.Variants[i];
+        var weight = Model.Weights.First(w => w.WeightOption_ID == variant.WeightOptionId);
+        <tr><td><input asp-for="Request.Variants[i].Enabled" class="form-check-input" aria-label="Продавати торт вагою @weight.Weight кг" /><input asp-for="Request.Variants[i].WeightOptionId" type="hidden" /></td>
+        <td><label for="Request_Variants_@(i)__Enabled">@weight.Weight.ToString("0.0") кг</label></td>
+        <td>
+    <input name="Request.Variants[@i].Price"
+       id="Request_Variants_@(i)__Price"
+       value="@(variant.Price.HasValue && variant.Price.Value > 0 ? variant.Price.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")"
+       type="number"
+       step="0.01"
+       min="0"
+       max="99999999.99"
+       class="form-control"
+       aria-label="Ціна торта вагою @weight.Weight.ToString("0.0") кг" />
+    <span asp-validation-for="Request.Variants[i].Price" class="text-danger"></span>
+</td></tr>
+    }
+    </tbody></table></div>
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">До списку</a>
+    @if(Model.Id != null){<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Оновити сторінку</a>}
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

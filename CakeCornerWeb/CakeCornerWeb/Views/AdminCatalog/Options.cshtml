@@ -1,0 +1,31 @@
+@model CatalogLookupPage
+@{ ViewData["Title"] = "Довідники каталогу"; }
+@await Html.PartialAsync("_AdminNavigation")
+<h1>Категорії, смаки та вага</h1>
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+<form asp-action="Options" method="post" class="card p-3 mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3"><label asp-for="Request.Kind" class="form-label">Довідник</label>
+            <select asp-for="Request.Kind" class="form-select"><option value="Category">Категорія</option><option value="Flavor">Смак</option><option value="Weight">Вага</option></select>
+        </div>
+        <div class="col-md-4"><label asp-for="Request.Name" class="form-label">Назва категорії або смаку</label><input asp-for="Request.Name" class="form-control" maxlength="100" /></div>
+        <div class="col-md-3">
+    <label asp-for="Request.Weight" class="form-label">Для ваги: кг</label>
+    <input name="Request.Weight" 
+           id="Request_Weight" 
+           value="@(Model.Request.Weight > 0 ? Model.Request.Weight.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")"
+           type="number" 
+           step="0.1" 
+           min="0" 
+           max="99.9" 
+           class="form-control" />
+</div>
+        <div class="col-md-2"><button class="btn btn-primary" type="submit">Додати</button></div>
+    </div>
+</form>
+<div class="row g-3">
+    <section class="col-md-4"><h2 class="h4">Категорії</h2><ul class="list-group">@foreach(var item in Model.Categories){<li class="list-group-item">@item.CategoryName</li>}</ul></section>
+    <section class="col-md-4"><h2 class="h4">Смаки</h2><ul class="list-group">@foreach(var item in Model.Flavors){<li class="list-group-item">@item.FlavorName</li>}</ul></section>
+    <section class="col-md-4"><h2 class="h4">Вагові варіанти</h2><ul class="list-group">@foreach(var item in Model.Weights){<li class="list-group-item">@item.Weight.ToString("0.0") кг</li>}</ul></section>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

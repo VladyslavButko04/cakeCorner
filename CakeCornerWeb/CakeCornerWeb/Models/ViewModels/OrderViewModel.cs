@@ -26,6 +26,8 @@ public class CheckoutPage
     public CheckoutRequest Request { get; set; } = new();
     public Cart Cart { get; set; } = null!;
     public List<PickupLocation> Locations { get; set; } = [];
+    public bool HasUnavailableItems => Cart.CartItems.Any(i => !i.CakeWeight.IsActive || !i.CakeWeight.Cake.IsActive)
+        || Cart.CustomItems.Any(i => !CakeCornerWeb.Services.CatalogAvailability.IsAvailable(i.CustomCake));
     public decimal Total => Cart.CartItems.Sum(i => i.Price * i.Quantity) + Cart.CustomItems.Sum(i => i.UnitPrice * i.Quantity);
 }
 

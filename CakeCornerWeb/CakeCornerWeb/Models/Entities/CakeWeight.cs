@@ -3,6 +3,7 @@
     public class CakeWeight
     {
         public int CakeWeight_ID { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public int Cake_ID { get; set; }
         public Cake Cake { get; set; }

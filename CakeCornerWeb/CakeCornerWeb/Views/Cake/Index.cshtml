@@ -61,8 +61,8 @@
     <div class="row">
         @foreach (var cake in Model)
         {
-            var validWeights = cake.CakeWeights?.Where(w => w.WeightOption != null).ToList();
-            var hasWeights = validWeights != null && validWeights.Any();
+            var validWeights = cake.CakeWeights.Where(w => w.WeightOption != null && w.IsActive).ToList();
+            var hasWeights = validWeights.Any();
 
             var minWeight = hasWeights ? validWeights.Min(w => w.WeightOption.Weight) : 0;
             var minPrice = hasWeights ? validWeights.Min(w => w.Price) : 0;

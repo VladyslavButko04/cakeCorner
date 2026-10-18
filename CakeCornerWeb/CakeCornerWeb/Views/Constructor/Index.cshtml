@@ -25,14 +25,29 @@
                     <div class="card-body">
                         <div class="mb-3"><label asp-for="Request.GuestCount" class="form-label fw-bold">Кількість гостей</label><input asp-for="Request.GuestCount" type="number" min="1" max="50" class="form-control" /><small>Орієнтир — 200 г на гостя. Остаточну вагу можна змінити нижче.</small></div>
                         <div class="mb-3"><label asp-for="Request.Shape" class="form-label fw-bold">Форма торта</label><select asp-for="Request.Shape" class="form-select"><option value="Round">Кругла</option><option value="Square">Квадратна</option><option value="Heart">Серце</option></select></div>
-                        <div class="mb-3"><label asp-for="Request.Weight" class="form-label fw-bold">Вага, кг</label><input asp-for="Request.Weight" type="number" min="0.5" max="10" step="0.1" required class="form-control" /></div>
+                        <div class="mb-3">
+                            <label asp-for="Request.Weight" class="form-label fw-bold">Вага, кг</label>
+                            <input name="Request.Weight"
+                                   id="Request_Weight"
+                                   value="@(Model.Request.Weight > 0 ? Model.Request.Weight.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")"
+                                   type="number"
+                                   min="0.5"
+                                   max="10"
+                                   step="0.1"
+                                   required
+                                   class="form-control" />
+                        </div>
                         <div class="mb-3"><label asp-for="Request.Quantity" class="form-label fw-bold">Кількість тортів</label><input asp-for="Request.Quantity" type="number" min="1" max="@CartLimits.MaxQuantity" required class="form-control" /></div>
                     </div>
                 </div>
                 <div class="card mb-4 shadow-sm border-0">
                     <div class="card-header bg-light"><h5 class="mb-0">Крок 2. Смак та текстура</h5></div>
                     <div class="card-body">
-                        @foreach(var slot in new[] { ("BiscuitId", "Biscuit", "Бісквіт", Model.Request.BiscuitId), ("FillingId", "Filling", "Начинка", Model.Request.FillingId), ("CreamId", "Cream", "Крем", Model.Request.CreamId), ("SoakingId", "Soaking", "Просочення", Model.Request.SoakingId), ("MousseId", "Mousse", "Мус", Model.Request.MousseId) })
+                        @foreach(var slot in new[] { ("BiscuitId", "Biscuit", "Бісквіт", Model.Request.BiscuitId), 
+                        ("FillingId", "Filling", "Начинка", Model.Request.FillingId), 
+                        ("CreamId", "Cream", "Крем", Model.Request.CreamId), 
+                        ("SoakingId", "Soaking", "Просочення", Model.Request.SoakingId), 
+                        ("MousseId", "Mousse", "Мус", Model.Request.MousseId) })
                         {
                             <div class="mb-3"><label for="@slot.Item1" class="form-label fw-bold">@slot.Item3</label>
                                 <select name="Request.@slot.Item1" id="@slot.Item1" class="form-select component" required>
