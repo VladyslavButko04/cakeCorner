@@ -3,6 +3,8 @@
 
 @{
     ViewData["Title"] = "Кошик";
+    var hasUnavailable = Model.CartItems.Any(i => !i.CakeWeight.IsActive || !i.CakeWeight.Cake.IsActive)
+        || Model.CustomItems.Any(i => !CakeCornerWeb.Services.CatalogAvailability.IsAvailable(i.CustomCake));
     var totalAmount = Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.CustomItems.Sum(i => i.UnitPrice * i.Quantity);
 }
 
@@ -19,6 +21,7 @@
         <div class="alert alert-danger" role="alert">@error</div>
     }
 
+    @if(hasUnavailable){<p class="alert alert-warning">Деякі позиції більше недоступні. Видаліть їх перед оформленням замовлення.</p>}
     <p class="text-muted">Ціни готових тортів оновлюються з каталогу. Ціна кастомного торта розраховується при додаванні конфігурації.</p>
 
     @if (!Model.CartItems.Any() && !Model.CustomItems.Any())
@@ -44,9 +47,11 @@
             <tbody>
                 @foreach (var item in Model.CartItems)
                 {
+                    var available = item.CakeWeight is { IsActive: true } && item.CakeWeight.Cake.IsActive;
                     <tr>
                         <td>
                             <strong>@item.CakeWeight?.Cake?.CakeName</strong>
+                            @if(!available){<span class="badge text-bg-warning">Недоступний</span>}
                         </td>
                         <td>@item.CakeWeight?.WeightOption?.Weight кг</td>
                         <td>@item.Price.ToString("0.00") грн</td>
@@ -56,7 +61,7 @@
                                 <input type="number" name="quantity" value="@item.Quantity" min="1"
                                        max="@CartLimits.MaxQuantity" required class="form-control form-control-sm"
                                        style="width: 5rem" aria-label="Кількість: @item.CakeWeight?.Cake?.CakeName" />
-                                <button type="submit" class="btn btn-outline-primary btn-sm">Оновити</button>
+                                <button type="submit" class="btn btn-outline-primary btn-sm" disabled="@(!available)">Оновити</button>
                             </form>
                         </td>
                         <td>@((item.Price * item.Quantity).ToString("0.00")) грн</td>
@@ -73,6 +78,7 @@
                     <tr>
                         <td class="custom-cake-summary">
                             <strong>Кастомний торт</strong>
+                            @if(!CakeCornerWeb.Services.CatalogAvailability.IsAvailable(item.CustomCake)){<span class="badge text-bg-warning">Інгредієнт недоступний</span>}
                             @await Html.PartialAsync("_CustomCakeImages", CustomCakeImageCards.ForItem(item, IngredientImages))
                             <p>@item.CustomCake.ConfigurationDescription</p>
                             @if(!string.IsNullOrWhiteSpace(item.CustomCake.Inscription)){<p>Напис: @item.CustomCake.Inscription</p>}
@@ -82,7 +88,7 @@
                             <form asp-controller="Constructor" asp-action="UpdateQuantity" method="post" class="d-flex gap-2">
                                 <input type="hidden" name="cartItemId" value="@item.CustomCakeCart_ID" />
                                 <input type="number" name="quantity" value="@item.Quantity" min="1" max="@CartLimits.MaxQuantity" required class="form-control" aria-label="Кількість кастомних тортів" />
-                                <button class="btn btn-outline-primary btn-sm" type="submit">Оновити</button>
+                                <button class="btn btn-outline-primary btn-sm" type="submit" disabled="@(!CakeCornerWeb.Services.CatalogAvailability.IsAvailable(item.CustomCake))">Оновити</button>
                             </form>
                         </td>
                         <td>@((item.UnitPrice * item.Quantity).ToString("0.00")) грн</td>
@@ -99,7 +105,7 @@
                 <form asp-controller="Cart" asp-action="Clear" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-secondary me-2">Очистити</button>
                 </form>
-                 <a asp-controller="Orders" asp-action="Checkout" class="btn btn-success btn-lg">Оформити замовлення</a>
+                 @if(!hasUnavailable){<a asp-controller="Orders" asp-action="Checkout" class="btn btn-success btn-lg">Оформити замовлення</a>}
             </div>
         </div>
     }

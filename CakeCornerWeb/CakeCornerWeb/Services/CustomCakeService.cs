@@ -24,11 +24,12 @@ public class CustomCakeService(ApplicationDbContext context)
         if (request.Weight != decimal.Round(request.Weight, 1))
             throw new OrderRuleException("Вкажіть вагу з точністю до 0,1 кг.");
         await using var transaction = await context.Database.BeginTransactionAsync();
+        await SqlServerLocks.AcquireAsync(context, CatalogAvailability.LockResource, shared: true);
         await SqlServerLocks.AcquireAsync(context, $"CakeCorner:Cart:{personId}");
         var choices = new[] { (request.BiscuitId, "Biscuit"), (request.FillingId, "Filling"),
             (request.CreamId, "Cream"), (request.SoakingId, "Soaking"), (request.MousseId, "Mousse") };
         var ids = choices.Select(c => c.Item1).ToArray();
-        var ingredients = await context.Ingredients.Include(i => i.Type).Where(i => ids.Contains(i.Ingredients_ID)).ToListAsync();
+        var ingredients = await context.Ingredients.Include(i => i.Type).Where(i => i.IsActive && ids.Contains(i.Ingredients_ID)).ToListAsync();
         foreach (var (id, type) in choices)
             if (!ingredients.Any(i => i.Ingredients_ID == id && i.Type.IngredientsTypesName == type && i.Price >= 0 && !string.IsNullOrWhiteSpace(i.IngredientName)))
                 throw new OrderRuleException("Один із компонентів недоступний або має неправильний тип.");
@@ -62,10 +63,13 @@ public class CustomCakeService(ApplicationDbContext context)
         if (quantity != null && (quantity < 1 || quantity > CartLimits.MaxQuantity))
             throw new OrderRuleException($"Кількість має бути від 1 до {CartLimits.MaxQuantity}.");
         await using var transaction = await context.Database.BeginTransactionAsync();
+        await SqlServerLocks.AcquireAsync(context, CatalogAvailability.LockResource, shared: true);
         await SqlServerLocks.AcquireAsync(context, $"CakeCorner:Cart:{personId}");
-        var item = await context.CustomCartItems.Include(i => i.CustomCake)
+        var item = await Query()
             .SingleOrDefaultAsync(i => i.CustomCakeCart_ID == itemId && i.Order_ID == null && i.CustomCake.Person_ID == personId);
         if (item == null) return false;
+        if (quantity != null && !CatalogAvailability.IsAvailable(item.CustomCake))
+            throw new OrderRuleException("Один з інгредієнтів більше недоступний. Видаліть конфігурацію та зберіть нову.");
         if (quantity == null) context.CustomCartItems.Remove(item);
         else item.Quantity = quantity.Value;
         await context.SaveChangesAsync();

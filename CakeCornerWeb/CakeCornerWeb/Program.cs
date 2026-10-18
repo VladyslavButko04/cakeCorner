@@ -25,6 +25,8 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<CatalogAdminService>();
+builder.Services.AddSingleton<CatalogImageStore>();
 builder.Services.AddScoped<CustomCakeService>();
 builder.Services.AddSingleton<IngredientImageService>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, CurrentAdminHandler>();
@@ -49,6 +51,17 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+var cultureInfo = new System.Globalization.CultureInfo("uk-UA");
+cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
+
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(cultureInfo),
+    SupportedCultures = new[] { cultureInfo },
+    SupportedUICultures = new[] { cultureInfo }
+});
 
 app.UseStaticFiles();
 app.UseHttpsRedirection();

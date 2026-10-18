@@ -24,9 +24,11 @@ public class CartService(ApplicationDbContext context) : ICartService
 
         return WithCartLockAsync(personId, async () =>
         {
-            var variant = await context.CakeWeights.FindAsync(cakeWeightId);
+            var variant = await context.CakeWeights.Include(v => v.Cake).SingleOrDefaultAsync(v => v.CakeWeight_ID == cakeWeightId);
             if (variant == null)
                 return CartOperationResult.NotFound;
+            if (!variant.IsActive || !variant.Cake.IsActive || variant.Price <= 0)
+                return CartOperationResult.Unavailable;
 
             var cart = await LoadCartAsync(personId) ?? CreateCart(personId);
             var item = cart.CartItems.FirstOrDefault(i => i.CakeWeight_ID == cakeWeightId);
@@ -69,6 +71,8 @@ public class CartService(ApplicationDbContext context) : ICartService
             if (item == null)
                 return CartOperationResult.NotFound;
 
+            if (!item.CakeWeight.IsActive || !item.CakeWeight.Cake.IsActive)
+                return CartOperationResult.Unavailable;
             RefreshPrices(cart!);
             item.Quantity = quantity;
             cart!.UpdatedAt = DateTime.UtcNow;
@@ -140,6 +144,7 @@ public class CartService(ApplicationDbContext context) : ICartService
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(personId);
         await using var transaction = await context.Database.BeginTransactionAsync();
+        await SqlServerLocks.AcquireAsync(context, CatalogAvailability.LockResource, shared: true);
         // SQL Server transaction lock serializes this user's cart across requests/processes,
         // including the first addition when no Cart row exists yet.
         await SqlServerLocks.AcquireAsync(context, $"CakeCorner:Cart:{personId}");

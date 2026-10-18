@@ -4,7 +4,8 @@
     {
         Success,
         NotFound,
-        InvalidQuantity
+        InvalidQuantity,
+        Unavailable
     }
 
     public static class CartLimits

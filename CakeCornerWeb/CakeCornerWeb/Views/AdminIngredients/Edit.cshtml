@@ -1,0 +1,38 @@
+@model IngredientEditorPage
+@{ ViewData["Title"] = Model.Id == null ? "Новий інгредієнт" : "Редагування інгредієнта"; }
+@await Html.PartialAsync("_AdminNavigation")
+<h1>@ViewData["Title"]</h1>
+<form asp-action="@(Model.Id == null ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="mb-4">
+    <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+    <input asp-for="Request.RowVersion" type="hidden" />
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="mb-3"><label asp-for="Request.Name" class="form-label"></label><input asp-for="Request.Name" class="form-control" maxlength="100" /></div>
+            <div class="mb-3"><label asp-for="Request.TypeId" class="form-label"></label><select asp-for="Request.TypeId" asp-items="Model.Types" class="form-select"><option value="">Оберіть тип</option></select><p class="small text-muted">Тип інгредієнта, що вже входить до кастомного торта, змінювати не можна.</p></div>
+            <div class="mb-3">
+    <label asp-for="Request.Price" class="form-label"></label>
+    <input name="Request.Price" 
+           id="Request_Price"
+           value="@(Model.Request.Price > 0 ? Model.Request.Price.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")"
+           type="number" 
+           step="0.1" 
+           min="0" 
+           max="99999999.99" 
+           class="form-control" />
+    <span asp-validation-for="Request.Price" class="text-danger"></span>
+</div>
+            <div class="mb-3"><label asp-for="Request.Description" class="form-label"></label><textarea asp-for="Request.Description" class="form-control" rows="5" maxlength="255"></textarea></div>
+        </div>
+        <div class="col-lg-4">
+            @if (!string.IsNullOrWhiteSpace(Model.ImagePath)) { <img src="@Url.Content(Model.ImagePath)" alt="Поточне фото інгредієнта" class="img-fluid rounded mb-3" style="max-height:260px" /> }
+            <label asp-for="Request.Image" class="form-label">Фотографія інгредієнта</label>
+            <input asp-for="Request.Image" type="file" accept="image/jpeg,image/png,image/webp" required="@(Model.Id == null)" class="form-control" />
+            <p class="small text-muted mt-2">JPEG, PNG або WebP, до 5 МБ. Для нового інгредієнта фото обов'язкове; при редагуванні можна залишити поточне.</p>
+            <p class="small text-muted">Якщо форма повернулась з помилкою, новий файл потрібно обрати повторно.</p>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">До списку</a>
+    @if(Model.Id != null){<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Оновити сторінку</a>}
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -51,6 +51,9 @@ namespace CakeCornerWeb.Extensions
                             (context.Request.Path.StartsWithSegments("/Orders") ||
                              context.Request.Path.StartsWithSegments("/Constructor") ||
                              context.Request.Path.StartsWithSegments("/AdminOrders") ||
+                             context.Request.Path.StartsWithSegments("/AdminCatalog") ||
+                             context.Request.Path.StartsWithSegments("/AdminCakes") ||
+                             context.Request.Path.StartsWithSegments("/AdminIngredients") ||
                              context.Request.Path.StartsWithSegments("/Account/Profile")))
                         {
                             context.HandleResponse();
@@ -65,7 +68,7 @@ namespace CakeCornerWeb.Extensions
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("Client", policy => policy.RequireRole("Client"));
-                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin").AddRequirements(new CurrentAdminRequirement()));
             });
 
             return services;

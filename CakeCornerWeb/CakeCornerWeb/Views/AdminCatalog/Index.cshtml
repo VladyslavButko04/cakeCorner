@@ -1,0 +1,18 @@
+@model CatalogDashboard
+@{ ViewData["Title"] = "Адмін-панель"; }
+@await Html.PartialAsync("_AdminNavigation")
+<h1 class="mb-4">Адмін-панель</h1>
+<div class="row g-3">
+    <div class="col-md-6"><div class="card h-100"><div class="card-body">
+        <h2 class="h4">Готові торти <span class="badge text-bg-light">@Model.Cakes</span></h2>
+        <p>Назва, категорія, смак, описи, фотографія та ціни за ваговими варіантами.</p>
+        <a asp-controller="AdminCakes" asp-action="Create" class="btn btn-primary">Додати торт</a>
+        <a asp-controller="AdminCakes" asp-action="Index" class="btn btn-outline-primary">Керувати тортами</a>
+    </div></div></div>
+    <div class="col-md-6"><div class="card h-100"><div class="card-body">
+        <h2 class="h4">Інгредієнти <span class="badge text-bg-light">@Model.Ingredients</span></h2>
+        <p>Компоненти конструктора, їх типи, фотографії та тарифи за кілограм.</p>
+        <a asp-controller="AdminIngredients" asp-action="Create" class="btn btn-primary">Додати інгредієнт</a>
+        <a asp-controller="AdminIngredients" asp-action="Index" class="btn btn-outline-primary">Керувати інгредієнтами</a>
+    </div></div></div>
+</div>

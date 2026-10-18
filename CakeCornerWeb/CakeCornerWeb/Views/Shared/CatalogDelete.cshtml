@@ -1,0 +1,11 @@
+﻿@model CatalogDeletePage
+@{ ViewData["Title"] = "Видалення з каталогу"; }
+@await Html.PartialAsync("_AdminNavigation")
+<h1>Видалити «@Model.Name»?</h1>
+<p>Товар буде приховано від нових покупок. Історія замовлень збережеться.
+    Повернути товар можна через вкладку «Архів».</p>
+<form asp-controller="@Model.Controller" asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" name="RowVersion" value="@Model.RowVersion" />
+    <button type="submit" class="btn btn-danger">Видалити з каталогу</button>
+    <a asp-controller="@Model.Controller" asp-action="Index" class="btn btn-outline-secondary">Скасувати</a>
+</form>

@@ -3,6 +3,8 @@
     public class Cake
     {
         public int Cake_ID { get; set; }
+        public bool IsActive { get; set; } = true;
+        public byte[] RowVersion { get; set; } = [];
         public int Category_ID { get; set; }
         public int Flavor_ID { get; set; }
 

@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = Model.IsAdmin ? "Обробка замовлень" : "Мої замовлення";
 }
+@if (Model.IsAdmin) { @await Html.PartialAsync("_AdminNavigation") }
 <h1>@ViewData["Title"]</h1>
 @if (Model.IsAdmin)
 {
