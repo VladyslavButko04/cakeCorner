@@ -17,7 +17,8 @@ public class ConstructorController(ApplicationDbContext context, CustomCakeServi
     {
         Request = request ?? new() { GuestCount = 10, Weight = 2m },
         Ingredients = await context.Ingredients.AsNoTracking().Include(i => i.Type)
-            .Where(i => i.IngredientName != null && i.Price >= 0).OrderBy(i => i.IngredientName).ToListAsync()
+            .Where(i => i.IsActive && i.IngredientName != null && i.Price >= 0
+                && CatalogAdminService.IngredientTypes.Contains(i.Type.IngredientsTypesName)).OrderBy(i => i.IngredientName).ToListAsync()
     };
 
     [HttpGet]

@@ -26,7 +26,6 @@ public class CustomCake
     public int Biscuit_ID { get; set; }
     public int Filling_ID { get; set; }
     public int Cream_ID { get; set; }
-    public int Soaking_ID { get; set; }
     public int MousseCheeseCake_ID { get; set; }
     public decimal Price { get; set; }
     public decimal Weight { get; set; }
@@ -39,9 +38,8 @@ public class CustomCake
     public Ingredient Biscuit { get; set; } = null!;
     public Ingredient Filling { get; set; } = null!;
     public Ingredient Cream { get; set; } = null!;
-    public Ingredient Soaking { get; set; } = null!;
     public Ingredient Mousse { get; set; } = null!;
-    public string Description => $"Бісквіт: {Biscuit.IngredientName}; начинка: {Filling.IngredientName}; крем: {Cream.IngredientName}; просочення: {Soaking.IngredientName}; мус: {Mousse.IngredientName}";
+    public string Description => $"Бісквіт: {Biscuit.IngredientName}; начинка: {Filling.IngredientName}; крем: {Cream.IngredientName}; мус: {Mousse.IngredientName}";
     public string ConfigurationDescription => Description
         + (Shape == null ? "" : $"; форма: {ShapeLabel(Shape)}")
         + (GuestCount == null ? "" : $"; гостей: {GuestCount}")

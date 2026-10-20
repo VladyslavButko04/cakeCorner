@@ -63,7 +63,6 @@ public class CustomCakeRequest
     [Range(1, int.MaxValue)] public int BiscuitId { get; set; }
     [Range(1, int.MaxValue)] public int FillingId { get; set; }
     [Range(1, int.MaxValue)] public int CreamId { get; set; }
-    [Range(1, int.MaxValue)] public int SoakingId { get; set; }
     [Range(1, int.MaxValue)] public int MousseId { get; set; }
     [Range(typeof(decimal), "0.5", "10.0")]
     public decimal Weight { get; set; } = 1.5m;

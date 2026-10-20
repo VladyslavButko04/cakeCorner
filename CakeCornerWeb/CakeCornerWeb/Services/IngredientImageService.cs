@@ -11,8 +11,7 @@ public sealed class IngredientImageService(IWebHostEnvironment environment)
         ["Biscuit"] = "biscuit",
         ["Cream"] = "cream",
         ["Filling"] = "fillings",
-        ["Mousse"] = "mouses",
-        ["Soaking"] = "soaking"
+        ["Mousse"] = "mouses"
     };
 
     public string ForIngredient(Ingredient? ingredient, string type) => Resolve(ingredient?.IngredientImagePath, type);

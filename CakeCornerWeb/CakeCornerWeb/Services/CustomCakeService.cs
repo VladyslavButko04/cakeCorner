@@ -12,7 +12,6 @@ public class CustomCakeService(ApplicationDbContext context)
         .Include(i => i.CustomCake).ThenInclude(c => c.Biscuit)
         .Include(i => i.CustomCake).ThenInclude(c => c.Filling)
         .Include(i => i.CustomCake).ThenInclude(c => c.Cream)
-        .Include(i => i.CustomCake).ThenInclude(c => c.Soaking)
         .Include(i => i.CustomCake).ThenInclude(c => c.Mousse);
 
     public Task<List<CustomCakeCart>> ActiveAsync(int personId) => Query()
@@ -27,7 +26,7 @@ public class CustomCakeService(ApplicationDbContext context)
         await SqlServerLocks.AcquireAsync(context, CatalogAvailability.LockResource, shared: true);
         await SqlServerLocks.AcquireAsync(context, $"CakeCorner:Cart:{personId}");
         var choices = new[] { (request.BiscuitId, "Biscuit"), (request.FillingId, "Filling"),
-            (request.CreamId, "Cream"), (request.SoakingId, "Soaking"), (request.MousseId, "Mousse") };
+            (request.CreamId, "Cream"), (request.MousseId, "Mousse") };
         var ids = choices.Select(c => c.Item1).ToArray();
         var ingredients = await context.Ingredients.Include(i => i.Type).Where(i => i.IsActive && ids.Contains(i.Ingredients_ID)).ToListAsync();
         foreach (var (id, type) in choices)
@@ -43,7 +42,6 @@ public class CustomCakeService(ApplicationDbContext context)
             Biscuit_ID = request.BiscuitId,
             Filling_ID = request.FillingId,
             Cream_ID = request.CreamId,
-            Soaking_ID = request.SoakingId,
             MousseCheeseCake_ID = request.MousseId,
             Weight = request.Weight,
             Price = price,

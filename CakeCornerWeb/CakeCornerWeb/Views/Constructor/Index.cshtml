@@ -46,7 +46,6 @@
                         @foreach(var slot in new[] { ("BiscuitId", "Biscuit", "Бісквіт", Model.Request.BiscuitId), 
                         ("FillingId", "Filling", "Начинка", Model.Request.FillingId), 
                         ("CreamId", "Cream", "Крем", Model.Request.CreamId), 
-                        ("SoakingId", "Soaking", "Просочення", Model.Request.SoakingId), 
                         ("MousseId", "Mousse", "Мус", Model.Request.MousseId) })
                         {
                             <div class="mb-3"><label for="@slot.Item1" class="form-label fw-bold">@slot.Item3</label>

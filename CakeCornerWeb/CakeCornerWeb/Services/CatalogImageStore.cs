@@ -13,7 +13,6 @@ public sealed class CatalogImageStore(IWebHostEnvironment environment, ILogger<C
         ["Biscuit"] = "biscuit",
         ["Cream"] = "cream",
         ["Filling"] = "fillings",
-        ["Soaking"] = "soaking",
         ["Mousse"] = "mouses"
     };
 

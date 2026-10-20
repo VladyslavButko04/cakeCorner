@@ -32,7 +32,6 @@ public class OrderService(ApplicationDbContext context)
         .Include(o => o.CustomItems).ThenInclude(i => i.CustomCake).ThenInclude(c => c.Biscuit)
         .Include(o => o.CustomItems).ThenInclude(i => i.CustomCake).ThenInclude(c => c.Filling)
         .Include(o => o.CustomItems).ThenInclude(i => i.CustomCake).ThenInclude(c => c.Cream)
-        .Include(o => o.CustomItems).ThenInclude(i => i.CustomCake).ThenInclude(c => c.Soaking)
         .Include(o => o.CustomItems).ThenInclude(i => i.CustomCake).ThenInclude(c => c.Mousse)
         .Include(o => o.History).AsSplitQuery();
 

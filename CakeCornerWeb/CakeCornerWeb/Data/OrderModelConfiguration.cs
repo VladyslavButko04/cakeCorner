@@ -94,7 +94,6 @@ public static class OrderModelConfiguration
         custom.HasOne(c => c.Biscuit).WithMany().HasForeignKey(c => c.Biscuit_ID).OnDelete(DeleteBehavior.NoAction);
         custom.HasOne(c => c.Filling).WithMany().HasForeignKey(c => c.Filling_ID).OnDelete(DeleteBehavior.NoAction);
         custom.HasOne(c => c.Cream).WithMany().HasForeignKey(c => c.Cream_ID).OnDelete(DeleteBehavior.NoAction);
-        custom.HasOne(c => c.Soaking).WithMany().HasForeignKey(c => c.Soaking_ID).OnDelete(DeleteBehavior.NoAction);
         custom.HasOne(c => c.Mousse).WithMany().HasForeignKey(c => c.MousseCheeseCake_ID).OnDelete(DeleteBehavior.NoAction);
 
         var customItem = model.Entity<CustomCakeCart>();

@@ -8,7 +8,7 @@ namespace CakeCornerWeb.Services;
 
 public sealed class CatalogAdminService(ApplicationDbContext context, CatalogImageStore images)
 {
-    public static readonly string[] IngredientTypes = ["Biscuit", "Cream", "Filling", "Soaking", "Mousse"];
+    public static readonly string[] IngredientTypes = ["Biscuit", "Cream", "Filling", "Mousse"];
 
     public async Task<int> SaveCakeAsync(int? id, CakeEditorRequest request, CancellationToken ct = default)
     {
@@ -106,7 +106,7 @@ public sealed class CatalogAdminService(ApplicationDbContext context, CatalogIma
             throw new CatalogRuleException("Оберіть тип, який підтримує конструктор.");
         if (id != null && ingredient.IngredientTypes_ID != request.TypeId &&
             await context.CustomCakes.AnyAsync(c => c.Biscuit_ID == id || c.Cream_ID == id ||
-                c.Filling_ID == id || c.Soaking_ID == id || c.MousseCheeseCake_ID == id, ct))
+                c.Filling_ID == id || c.MousseCheeseCake_ID == id, ct))
             throw new CatalogRuleException("Тип використаного інгредієнта змінювати не можна. Створіть новий інгредієнт.");
         if (id == null && request.Image == null)
             throw new CatalogRuleException("Додайте фотографію інгредієнта.");
