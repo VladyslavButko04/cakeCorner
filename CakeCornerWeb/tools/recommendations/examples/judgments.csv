@@ -1,0 +1,7 @@
+request_id,candidate_key,relevance
+synthetic-01,ready:1,1
+synthetic-01,ready:2,3
+synthetic-01,ready:3,1
+synthetic-01,ready:4,3
+synthetic-02,ready:1,1
+synthetic-02,ready:2,2

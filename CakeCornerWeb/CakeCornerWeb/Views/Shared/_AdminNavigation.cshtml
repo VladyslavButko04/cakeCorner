@@ -4,6 +4,7 @@
     <a asp-controller="AdminCakes" asp-action="Index" class="btn btn-outline-primary">Торти</a>
     <a asp-controller="AdminIngredients" asp-action="Index" class="btn btn-outline-primary">Інгредієнти</a>
     <a asp-controller="AdminCatalog" asp-action="Options" class="btn btn-outline-primary">Категорії, смаки та вага</a>
+    <a asp-controller="AdminRecommendations" asp-action="Index" class="btn btn-outline-primary">Дані рекомендацій</a>
 </nav>
 @if (TempData["CatalogSuccess"] is string success)
 { <p class="alert alert-success" role="status">@success</p> }

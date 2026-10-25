@@ -1,0 +1,360 @@
+{
+  "methodVersion": "cakecorner-hybrid-v0.2-no-soaking",
+  "notice": "Synthetic contract fixtures only. Symbolic IDs are not database IDs. PairStatus is the aggregate of all ten checked pairs, not an alternative production data model. These checks do not measure recommendation quality.",
+  "pricingCases": [
+    {
+      "id": "P01",
+      "rates": [
+        "100",
+        "80",
+        "120",
+        "60"
+      ],
+      "weightKg": "1.5",
+      "quantity": 2,
+      "expectedUnit": "540.00",
+      "expectedSelection": "1080.00"
+    },
+    {
+      "id": "P02",
+      "rates": [
+        "0.01",
+        "0",
+        "0",
+        "0"
+      ],
+      "weightKg": "0.5",
+      "quantity": 1,
+      "expectedUnit": "0.01",
+      "expectedSelection": "0.01"
+    },
+    {
+      "id": "P03",
+      "rates": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "weightKg": "1.5",
+      "quantity": 1,
+      "expectedUnit": "0.00",
+      "expectedSelection": "0.00"
+    },
+    {
+      "id": "P04",
+      "rates": [
+        "100",
+        "80",
+        "120",
+        "60"
+      ],
+      "weightKg": "10",
+      "quantity": 99,
+      "expectedUnit": "3600.00",
+      "expectedSelection": "356400.00"
+    }
+  ],
+  "fitCases": [
+    {
+      "id": "F01",
+      "description": "Повний збіг з побажаннями",
+      "taste": 1,
+      "candidateSweetness": 2,
+      "desiredSweetness": 2,
+      "price": 1000,
+      "budget": 1000,
+      "expectedBudgetFit": 1,
+      "expectedSweetnessFit": 1,
+      "expectedFuzzy": 1,
+      "expectedScore": 1
+    },
+    {
+      "id": "F02",
+      "description": "Орієнтир перевищено на 12.5%",
+      "taste": 0.8,
+      "candidateSweetness": 3,
+      "desiredSweetness": 2,
+      "price": 1125,
+      "budget": 1000,
+      "expectedBudgetFit": 0.5,
+      "expectedSweetnessFit": 0.8,
+      "expectedFuzzy": 0.628,
+      "expectedScore": 0.714
+    },
+    {
+      "id": "F03",
+      "description": "Орієнтир перевищено на 25%, це soft, не strict",
+      "taste": 1,
+      "candidateSweetness": 2,
+      "desiredSweetness": 2,
+      "price": 1250,
+      "budget": 1000,
+      "expectedBudgetFit": 0,
+      "expectedSweetnessFit": 1,
+      "expectedFuzzy": 0.45,
+      "expectedScore": 0.725
+    },
+    {
+      "id": "F04",
+      "description": "Торт суттєво солодший за бажаний",
+      "taste": 1,
+      "candidateSweetness": 4,
+      "desiredSweetness": 1,
+      "price": 1000,
+      "budget": 1000,
+      "expectedBudgetFit": 1,
+      "expectedSweetnessFit": 0.4,
+      "expectedFuzzy": 0.73,
+      "expectedScore": 0.865
+    },
+    {
+      "id": "F05",
+      "description": "Всі відповідності на середньому рівні",
+      "taste": 0.5,
+      "candidateSweetness": 3.5,
+      "desiredSweetness": 1,
+      "price": 1125,
+      "budget": 1000,
+      "expectedBudgetFit": 0.5,
+      "expectedSweetnessFit": 0.5,
+      "expectedFuzzy": 0.4,
+      "expectedScore": 0.45
+    }
+  ],
+  "strategyCases": [
+    {
+      "id": "S01",
+      "fits": {
+        "taste": 0.8,
+        "sweetness": null,
+        "budget": null
+      },
+      "expectedStrategy": "partial-profile",
+      "expectedScore": 0.8
+    },
+    {
+      "id": "S02",
+      "fits": {
+        "taste": null,
+        "sweetness": 1,
+        "budget": 0.5
+      },
+      "expectedStrategy": "partial-profile",
+      "expectedScore": 0.75
+    },
+    {
+      "id": "S03",
+      "fits": {
+        "taste": null,
+        "sweetness": null,
+        "budget": null
+      },
+      "expectedStrategy": "popular-fallback",
+      "expectedScore": null
+    },
+    {
+      "id": "S04",
+      "fits": {
+        "taste": 1,
+        "sweetness": 1,
+        "budget": 1
+      },
+      "expectedStrategy": "hybrid-fuzzy",
+      "expectedScore": 1
+    }
+  ],
+  "constraintBase": {
+    "request": {
+      "budgetMode": "strict",
+      "budgetUah": 1200,
+      "quantity": 2,
+      "excludedAllergens": [],
+      "excludedIngredientIds": [],
+      "lockedIngredients": {},
+      "activeFeatures": [
+        "taste",
+        "sweetness"
+      ]
+    },
+    "candidate": {
+      "kind": "custom",
+      "unitPrice": 540,
+      "weightKg": 1.5,
+      "availability": "available",
+      "pairStatus": "allowed",
+      "allergenStatus": "verified",
+      "contains": [
+        "milk",
+        "gluten"
+      ],
+      "mayContain": [],
+      "ingredientIds": {
+        "Biscuit": "fixture-b",
+        "Cream": "fixture-c",
+        "Filling": "fixture-f",
+        "Mousse": "fixture-m"
+      },
+      "tasteKnown": true,
+      "sweetness": 2
+    }
+  },
+  "constraintCases": [
+    {
+      "id": "C01",
+      "description": "Кількість входить у бюджет позиції",
+      "expectedReason": null
+    },
+    {
+      "id": "C02",
+      "description": "Один торт вміщується, два — ні",
+      "requestOverride": {
+        "budgetUah": 1000
+      },
+      "expectedReason": "strict_budget"
+    },
+    {
+      "id": "C03",
+      "description": "Орієнтовний бюджет не є hard-виключенням",
+      "requestOverride": {
+        "budgetMode": "target",
+        "budgetUah": 1000
+      },
+      "expectedReason": null
+    },
+    {
+      "id": "C04",
+      "description": "Невідома доступність",
+      "candidateOverride": {
+        "availability": "unknown"
+      },
+      "expectedReason": "availability_unknown"
+    },
+    {
+      "id": "C05",
+      "description": "Виключений молочний алерген",
+      "requestOverride": {
+        "excludedAllergens": [
+          "milk"
+        ]
+      },
+      "expectedReason": "allergen_conflict"
+    },
+    {
+      "id": "C06",
+      "description": "Неперевірені дані при алергенному обмеженні",
+      "requestOverride": {
+        "excludedAllergens": [
+          "milk"
+        ]
+      },
+      "candidateOverride": {
+        "allergenStatus": "unknown"
+      },
+      "expectedReason": "allergen_unknown"
+    },
+    {
+      "id": "C07",
+      "description": "Може містити алерген також виключається",
+      "requestOverride": {
+        "excludedAllergens": [
+          "sesame"
+        ]
+      },
+      "candidateOverride": {
+        "mayContain": [
+          "sesame"
+        ]
+      },
+      "expectedReason": "allergen_conflict"
+    },
+    {
+      "id": "C08",
+      "description": "Заборонена хоча б одна пара",
+      "candidateOverride": {
+        "pairStatus": "forbidden"
+      },
+      "expectedReason": "compatibility_forbidden"
+    },
+    {
+      "id": "C09",
+      "description": "Невідома хоча б одна пара",
+      "candidateOverride": {
+        "pairStatus": "unknown"
+      },
+      "expectedReason": "compatibility_unknown"
+    },
+    {
+      "id": "C10",
+      "description": "Заборонено обраний інгредієнт",
+      "requestOverride": {
+        "excludedIngredientIds": [
+          "fixture-c"
+        ]
+      },
+      "expectedReason": "ingredient_excluded"
+    },
+    {
+      "id": "C11",
+      "description": "Закріплений компонент не змінено",
+      "requestOverride": {
+        "lockedIngredients": {
+          "Biscuit": "fixture-b"
+        }
+      },
+      "expectedReason": null
+    },
+    {
+      "id": "C12",
+      "description": "Закріплений компонент підмінено",
+      "requestOverride": {
+        "lockedIngredients": {
+          "Biscuit": "fixture-another"
+        }
+      },
+      "expectedReason": "locked_mismatch"
+    },
+    {
+      "id": "C13",
+      "description": "Невідома солодкість за активного побажання",
+      "candidateOverride": {
+        "sweetness": null
+      },
+      "expectedReason": "sensory_unknown"
+    },
+    {
+      "id": "C14",
+      "description": "Відсутність оцінки не заважає, якщо критерій не активний",
+      "requestOverride": {
+        "activeFeatures": [
+          "taste"
+        ]
+      },
+      "candidateOverride": {
+        "sweetness": null
+      },
+      "expectedReason": null
+    },
+    {
+      "id": "C15",
+      "description": "Нульова ціна не допускається",
+      "candidateOverride": {
+        "unitPrice": 0
+      },
+      "expectedReason": "invalid_price"
+    },
+    {
+      "id": "C16",
+      "description": "Готовий торт не має структурованого складу для перевірки locked IDs",
+      "candidateOverride": {
+        "kind": "ready"
+      },
+      "requestOverride": {
+        "lockedIngredients": {
+          "Biscuit": "fixture-b"
+        }
+      },
+      "expectedReason": "ready_composition_unknown"
+    }
+  ]
+}

@@ -18,8 +18,8 @@ public sealed class CakeEditorRequest
     public string Name { get; set; } = "";
     [Range(1, int.MaxValue), Display(Name = "Категорія")]
     public int CategoryId { get; set; }
-    [Range(1, int.MaxValue), Display(Name = "Смак")]
-    public int FlavorId { get; set; }
+    [Required, MinLength(1, ErrorMessage = "Оберіть щонайменше один смак."), MaxLength(100), Display(Name = "Смаки")]
+    public List<int> FlavorIds { get; set; } = [];
     [Required, StringLength(300), Display(Name = "Короткий опис")]
     public string ShortDescription { get; set; } = "";
     [Required, StringLength(4000), Display(Name = "Повний опис")]
@@ -28,6 +28,7 @@ public sealed class CakeEditorRequest
     [MaxLength(100)]
     public List<CakeVariantInput> Variants { get; set; } = [];
     public string? RowVersion { get; set; }
+    public CakeInformationInput AdditionalInformation { get; set; } = new();
 }
 
 public sealed class CakeEditorPage
@@ -38,6 +39,7 @@ public sealed class CakeEditorPage
     public List<SelectListItem> Categories { get; init; } = [];
     public List<SelectListItem> Flavors { get; init; } = [];
     public List<WeightOption> Weights { get; init; } = [];
+    public List<Allergen> Allergens { get; init; } = [];
 }
 
 public sealed class IngredientEditorRequest

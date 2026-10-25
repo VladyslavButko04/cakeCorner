@@ -2,6 +2,7 @@
 using CakeCornerWeb.Data;
 using CakeCornerWeb.Interfaces;
 using CakeCornerWeb.Models;
+using CakeCornerWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -18,23 +19,15 @@ public class CakeController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index(int? categoryId, int? flavorId)
-    {
-        var cakes = await _cakeRepository.GetFilteredCakeAsync(categoryId, flavorId);
+    public Task<IActionResult> Index(int? categoryId, int? flavorId, int page = 1, CancellationToken ct = default)
+        => CatalogAsync(categoryId, flavorId, null, page, ct);
 
-        var filterModel = new CakeFilterViewModel
-        {
-            CategoryId = categoryId,
-            FlavorId = flavorId,
-            Categories = new List<SelectListItem>
-        {
-            new SelectListItem { Value = "", Text = "Усі категорії" }
-        },
-            Flavors = new List<SelectListItem>
-        {
-            new SelectListItem { Value = "", Text = "Усі смаки" }
-        }
-        };
+    private async Task<IActionResult> CatalogAsync(int? categoryId, int? flavorId, string? search, int page, CancellationToken ct)
+    {
+        var model = await _cakeRepository.GetCatalogPageAsync(categoryId, flavorId, search, page, ct);
+        var filterModel = model.Filters;
+        filterModel.Categories.Add(new SelectListItem { Value = "", Text = "Усі категорії" });
+        filterModel.Flavors.Add(new SelectListItem { Value = "", Text = "Усі смаки" });
 
         var categories = await _cakeRepository.GetAllCategoriesAsync();
         filterModel.Categories.AddRange(categories.Select(c => new SelectListItem
@@ -50,9 +43,7 @@ public class CakeController : Controller
             Text = f.FlavorName
         }));
 
-        ViewBag.FilterModel = filterModel;
-
-        return View(cakes);
+        return View("Index", model);
     }
 
     [HttpGet]
@@ -82,34 +73,14 @@ public class CakeController : Controller
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Search(string query)
+    public async Task<IActionResult> Search(string? query, int? categoryId, int? flavorId, int page = 1, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(query))
         {
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index), new { categoryId, flavorId });
         }
 
-        var searchTerm = query.ToLower();
-
-        var searchResults = await _context.Cakes
-            .Include(c => c.CakeWeights)
-                .ThenInclude(cw => cw.WeightOption)
-            .Where(c =>
-                c.CakeName.ToLower().Contains(searchTerm) ||
-                (c.DescriptionShort != null && c.DescriptionShort.ToLower().Contains(searchTerm)) ||
-                (c.DescriptionLong != null && c.DescriptionLong.ToLower().Contains(searchTerm))
-            )
-            .ToListAsync();
-
-        ViewData["SearchQuery"] = query;
-
-        ViewBag.FilterModel = new CakeCornerWeb.Models.CakeFilterViewModel
-        {
-            Categories = await _context.Categories.Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = c.Category_ID.ToString(), Text = c.CategoryName }).ToListAsync(),
-            Flavors = await _context.Flavors.Select(f => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = f.Flavor_ID.ToString(), Text = f.FlavorName }).ToListAsync()
-        };
-
-        return View("Index", searchResults);
+        return await CatalogAsync(categoryId, flavorId, query, page, ct);
     }
 
     public async Task<IActionResult> Details(int id)
@@ -123,6 +94,8 @@ public class CakeController : Controller
             CakeName = cake.CakeName,
             DescriptionLong = cake.DescriptionLong,
             ImagePath = cake.ImagePath,
+            AdditionalInformation = CakeAdditionalInformationViewModel.FromCake(cake),
+            FlavorNames = cake.CakeFlavors.OrderBy(cf => cf.Flavor.FlavorName).Select(cf => cf.Flavor.FlavorName).Distinct().ToList(),
             Weights = cake.CakeWeights.Select(cw => new CakeDetailViewModel.WeightPrice
             {
                 CakeWeightId = cw.CakeWeight_ID,

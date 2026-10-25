@@ -1,0 +1,66 @@
+@model CakeCatalogPage
+@if (Model.TotalPages > 1)
+{
+    var action = Model.Filters.Search != null ? "Search" : "Index";
+    string PageUrl(int page) => Url.Action(action, "Cake", new
+    {
+        page, categoryId = Model.Filters.CategoryId, flavorId = Model.Filters.FlavorId, query = Model.Filters.Search
+    })!;
+    var firstPage = Math.Max(1, Model.Page - 2);
+    var lastPage = Math.Min(Model.TotalPages, Model.Page + 2);
+
+    <nav class="catalog-pagination" aria-label="Сторінки каталогу">
+        <p class="text-center text-muted">Сторінка @Model.Page з @Model.TotalPages</p>
+        <ul class="pagination justify-content-center flex-wrap">
+            <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                @if (Model.Page > 1)
+                {
+                    <a class="page-link" href="@PageUrl(Model.Page - 1)" rel="prev">Назад</a>
+                }
+                else
+                {
+                    <span class="page-link" aria-disabled="true">Назад</span>
+                }
+            </li>
+            @if (firstPage > 1)
+            {
+                <li class="page-item"><a class="page-link" href="@PageUrl(1)" aria-label="Сторінка 1">1</a></li>
+                @if (firstPage > 2)
+                {
+                    <li class="page-item disabled"><span class="page-link" aria-hidden="true">…</span></li>
+                }
+            }
+            @for (var pageNumber = firstPage; pageNumber <= lastPage; pageNumber++)
+            {
+                <li class="page-item @(pageNumber == Model.Page ? "active" : "")">
+                    @if (pageNumber == Model.Page)
+                    {
+                        <span class="page-link" aria-current="page" aria-label="Сторінка @pageNumber">@pageNumber</span>
+                    }
+                    else
+                    {
+                        <a class="page-link" href="@PageUrl(pageNumber)" aria-label="Сторінка @pageNumber">@pageNumber</a>
+                    }
+                </li>
+            }
+            @if (lastPage < Model.TotalPages)
+            {
+                @if (lastPage < Model.TotalPages - 1)
+                {
+                    <li class="page-item disabled"><span class="page-link" aria-hidden="true">…</span></li>
+                }
+                <li class="page-item"><a class="page-link" href="@PageUrl(Model.TotalPages)" aria-label="Сторінка @Model.TotalPages">@Model.TotalPages</a></li>
+            }
+            <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                @if (Model.Page < Model.TotalPages)
+                {
+                    <a class="page-link" href="@PageUrl(Model.Page + 1)" rel="next">Далі</a>
+                }
+                else
+                {
+                    <span class="page-link" aria-disabled="true">Далі</span>
+                }
+            </li>
+        </ul>
+    </nav>
+}

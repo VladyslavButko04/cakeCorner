@@ -10,6 +10,7 @@
 
         <div class="info-overlay">
             <h1>@Model.CakeName</h1>
+            <partial name="_CakeFlavorTags" model="Model.FlavorNames" />
             <p>@Model.DescriptionLong</p>
 
             <form asp-controller="Cart" asp-action="Add" method="post">
@@ -56,6 +57,7 @@
             </form>
         </div>
     </div>
+    <partial name="_CakeAdditionalInformation" model="Model.AdditionalInformation" />
 </div>
 
 @section Scripts {

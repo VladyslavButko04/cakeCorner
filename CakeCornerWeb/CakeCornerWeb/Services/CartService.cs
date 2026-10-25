@@ -90,6 +90,8 @@ public class CartService(ApplicationDbContext context) : ICartService
                 return CartOperationResult.NotFound;
 
             context.CartItems.Remove(item);
+            await new CakeCornerWeb.Recommendations.Persistence.RecommendationStore(context).RecordCommerceAsync(personId,
+                "remove_from_cart", CakeCornerWeb.Recommendations.Runtime.CommerceEventKey.For($"remove:ready:{cartItemId}"), cakeWeightId: item.CakeWeight_ID);
             cart!.UpdatedAt = DateTime.UtcNow;
             await context.SaveChangesAsync();
             return CartOperationResult.Success;
@@ -102,6 +104,11 @@ public class CartService(ApplicationDbContext context) : ICartService
             var cart = await LoadCartAsync(personId);
             var customItems = await new CustomCakeService(context).ActiveAsync(personId);
             context.CustomCartItems.RemoveRange(customItems);
+            var telemetry = new CakeCornerWeb.Recommendations.Persistence.RecommendationStore(context);
+            foreach (var item in customItems)
+                await telemetry.RecordCommerceAsync(personId, "remove_from_cart", CakeCornerWeb.Recommendations.Runtime.CommerceEventKey.For($"remove:custom:{item.CustomCakeCart_ID}"), customCakeId: item.CustomCake_ID);
+            foreach (var item in cart?.CartItems ?? [])
+                await telemetry.RecordCommerceAsync(personId, "remove_from_cart", CakeCornerWeb.Recommendations.Runtime.CommerceEventKey.For($"remove:ready:{item.CartItem_ID}"), cakeWeightId: item.CakeWeight_ID);
             if (cart != null && cart.CartItems.Count > 0)
             {
                 context.CartItems.RemoveRange(cart.CartItems);
@@ -143,13 +150,14 @@ public class CartService(ApplicationDbContext context) : ICartService
     private async Task<T> WithCartLockAsync<T>(int personId, Func<Task<T>> action)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(personId);
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = context.Database.CurrentTransaction == null
+            ? await context.Database.BeginTransactionAsync() : null;
         await SqlServerLocks.AcquireAsync(context, CatalogAvailability.LockResource, shared: true);
         // SQL Server transaction lock serializes this user's cart across requests/processes,
         // including the first addition when no Cart row exists yet.
         await SqlServerLocks.AcquireAsync(context, $"CakeCorner:Cart:{personId}");
         var result = await action();
-        await transaction.CommitAsync();
+        if (transaction != null) await transaction.CommitAsync();
         return result;
     }
 }

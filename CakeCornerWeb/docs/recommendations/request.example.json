@@ -1,0 +1,16 @@
+{
+  "mode": "Custom",
+  "dataMode": "Demo",
+  "preferredFlavors": {
+    "berry": 5,
+    "chocolate": 2
+  },
+  "desiredSweetness": 2.5,
+  "lockedIngredients": {},
+  "excludedIngredientIds": [],
+  "excludedAllergens": [],
+  "weightKg": 2.0,
+  "quantity": 1,
+  "shape": "Round",
+  "topK": 5
+}

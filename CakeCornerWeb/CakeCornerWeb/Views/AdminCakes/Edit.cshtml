@@ -10,7 +10,22 @@
             <div class="mb-3"><label asp-for="Request.Name" class="form-label"></label><input asp-for="Request.Name" class="form-control" maxlength="100" /><span asp-validation-for="Request.Name" class="text-danger"></span></div>
             <div class="row g-3 mb-3">
                 <div class="col-md-6"><label asp-for="Request.CategoryId" class="form-label"></label><select asp-for="Request.CategoryId" asp-items="Model.Categories" class="form-select"><option value="">Оберіть категорію</option></select></div>
-                <div class="col-md-6"><label asp-for="Request.FlavorId" class="form-label"></label><select asp-for="Request.FlavorId" asp-items="Model.Flavors" class="form-select"><option value="">Оберіть смак</option></select></div>
+                <div class="col-md-6">
+                    <fieldset>
+                        <legend class="fs-6">Смаки торта</legend>
+                        <p class="small text-muted">Оберіть один або кілька смаків.</p>
+                        <div class="row g-2">
+                        @foreach (var flavor in Model.Flavors)
+                        {
+                            <div class="col-sm-6"><label class="form-check">
+                                <input type="checkbox" name="Request.FlavorIds" value="@flavor.Value" checked="@Model.Request.FlavorIds.Contains(int.Parse(flavor.Value!))" class="form-check-input" />
+                                <span class="form-check-label">@flavor.Text</span>
+                            </label></div>
+                        }
+                        </div>
+                        <span asp-validation-for="Request.FlavorIds" class="text-danger"></span>
+                    </fieldset>
+                </div>
             </div>
             <p class="small"><a asp-controller="AdminCatalog" asp-action="Options" target="_blank" rel="noopener">Додати категорію, смак або вагу</a>. Після додавання оновіть форму, попередньо зберігши введені дані.</p>
             <div class="mb-3"><label asp-for="Request.ShortDescription" class="form-label"></label><textarea asp-for="Request.ShortDescription" class="form-control" rows="2" maxlength="300"></textarea></div>
@@ -46,6 +61,7 @@
 </td></tr>
     }
     </tbody></table></div>
+    <partial name="_CakeInformationFields" model="Model" />
     <button type="submit" class="btn btn-primary">Зберегти</button>
     <a asp-action="Index" class="btn btn-outline-secondary">До списку</a>
     @if(Model.Id != null){<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Оновити сторінку</a>}

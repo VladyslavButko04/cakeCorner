@@ -10,11 +10,11 @@
 @if (!Model.Items.Any()) { <p class="alert alert-info">Тортів не знайдено.</p> }
 else
 {
-    <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Фото</th><th>Торт</th><th>Категорія / смак</th><th>Варіанти ваги</th><th>Дії</th></tr></thead><tbody>
+    <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Фото</th><th>Торт</th><th>Категорія / смаки</th><th>Варіанти ваги</th><th>Дії</th></tr></thead><tbody>
     @foreach(var item in Model.Items)
     {
         <tr><td><img src="@Url.Content(item.ImagePath)" alt="@item.CakeName" width="80" height="65" style="object-fit:cover;border-radius:8px" loading="lazy" /></td>
-        <td><strong>@item.CakeName</strong><div class="small text-muted">@item.DescriptionShort</div></td><td>@item.Category.CategoryName / @item.Flavor.FlavorName</td><td>@item.CakeWeights.Count(v => v.IsActive)</td>
+        <td><strong>@item.CakeName</strong><div class="small text-muted">@item.DescriptionShort</div></td><td>@item.Category.CategoryName<partial name="_CakeFlavorTags" model="item.CakeFlavors.OrderBy(cf => cf.Flavor.FlavorName).Select(cf => cf.Flavor.FlavorName)" /></td><td>@item.CakeWeights.Count(v => v.IsActive)</td>
         <td><div class="d-flex flex-wrap gap-2">
         @if (Model.Archived)
         {

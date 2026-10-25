@@ -22,7 +22,8 @@ public sealed class AdminCakesController(ApplicationDbContext context, CatalogAd
         query = query?.Trim();
         if (query?.Length > 100) query = query[..100];
         var items = context.Cakes.AsNoTracking().Where(c => c.IsActive != archived)
-            .Include(c => c.Category).Include(c => c.Flavor).Include(c => c.CakeWeights).AsQueryable();
+            .Include(c => c.Category).Include(c => c.CakeFlavors).ThenInclude(cf => cf.Flavor)
+            .Include(c => c.CakeWeights).AsSplitQuery().AsQueryable();
         if (!string.IsNullOrWhiteSpace(query)) items = items.Where(c => c.CakeName.Contains(query));
         var pages = (int)Math.Ceiling(await items.CountAsync() / 20m);
         page = Math.Clamp(page, 1, Math.Max(1, pages));
@@ -43,16 +44,19 @@ public sealed class AdminCakesController(ApplicationDbContext context, CatalogAd
     public async Task<IActionResult> Edit(int id)
     {
         var cake = await context.Cakes.AsNoTracking().Include(c => c.CakeWeights)
+            .Include(c => c.CakeFlavors)
+            .Include(c => c.ProductInformation).Include(c => c.Allergens).ThenInclude(a => a.Allergen)
             .SingleOrDefaultAsync(c => c.Cake_ID == id && c.IsActive);
         if (cake == null) return NotFound();
         return View(await PageAsync(id, new CakeEditorRequest
         {
             Name = cake.CakeName,
             CategoryId = cake.Category_ID,
-            FlavorId = cake.Flavor_ID,
+            FlavorIds = cake.CakeFlavors.Select(cf => cf.Flavor_ID).Order().ToList(),
             ShortDescription = cake.DescriptionShort,
             Description = cake.DescriptionLong,
             RowVersion = Convert.ToBase64String(cake.RowVersion),
+            AdditionalInformation = CakeInformationEditor.FromCake(cake),
             Variants = cake.CakeWeights.Where(v => v.IsActive).Select(v => new CakeVariantInput
             { Enabled = true, WeightOptionId = v.WeightOption_ID, Price = v.Price }).ToList()
         }));
@@ -114,6 +118,7 @@ public sealed class AdminCakesController(ApplicationDbContext context, CatalogAd
 
     private async Task<CakeEditorPage> PageAsync(int? id, CakeEditorRequest request)
     {
+        request.FlavorIds ??= [];
         var weights = await context.WeightOptions.AsNoTracking().OrderBy(w => w.Weight).ToListAsync();
         var submitted = (request.Variants ?? []).GroupBy(v => v.WeightOptionId).ToDictionary(g => g.Key, g => g.First());
         // Reindex server-approved options without reusing posted hidden IDs from ModelState.
@@ -124,11 +129,24 @@ public sealed class AdminCakesController(ApplicationDbContext context, CatalogAd
         // Render only real options; crafted/removed IDs are never added to the form.
         request.Variants = weights.Select(w => submitted.TryGetValue(w.WeightOption_ID, out var value) ? value :
             new CakeVariantInput { WeightOptionId = w.WeightOption_ID }).ToList();
+        var allergens = await context.Allergens.AsNoTracking().OrderBy(a => a.Name).ToListAsync();
+        request.AdditionalInformation ??= new();
+        var postedAllergens = (request.AdditionalInformation.Allergens ?? []).GroupBy(a => a.AllergenId).ToDictionary(g => g.Key, g => g.First());
+        var allergenKeys = ModelState.Keys.Where(k => k.StartsWith("Request.AdditionalInformation.Allergens", StringComparison.OrdinalIgnoreCase)).ToArray();
+        if (allergenKeys.Any(k => ModelState[k]!.Errors.Count > 0))
+            ModelState.AddModelError("", "Перевірте позначки алергенів.");
+        foreach (var key in allergenKeys) ModelState.Remove(key);
+        request.AdditionalInformation.Allergens = allergens.Select(a => new CakeAllergenInput
+        {
+            AllergenId = a.Allergen_ID,
+            Presence = postedAllergens.TryGetValue(a.Allergen_ID, out var posted) && Enum.IsDefined(posted.Presence) ? posted.Presence : Models.Entities.AllergenPresence.None
+        }).ToList();
         return new CakeEditorPage
         {
             Id = id,
             Request = request,
             Weights = weights,
+            Allergens = allergens,
             ImagePath = id == null ? null : await context.Cakes.AsNoTracking().Where(c => c.Cake_ID == id).Select(c => c.ImagePath).FirstOrDefaultAsync(),
             Categories = await context.Categories.OrderBy(c => c.CategoryName).Select(c => new SelectListItem(c.CategoryName, c.Category_ID.ToString())).ToListAsync(),
             Flavors = await context.Flavors.OrderBy(f => f.FlavorName).Select(f => new SelectListItem(f.FlavorName, f.Flavor_ID.ToString())).ToListAsync()

@@ -1,0 +1,9 @@
+@{ ViewData["Title"] = "Підбір торта за смаком"; }
+@section Styles {
+    <link rel="stylesheet" href="~/css/recommendations.css" asp-append-version="true" />
+}
+@await Html.PartialAsync("_RecommendationPanel", "Ready")
+<a asp-controller="Constructor" asp-action="Index" class="btn btn-outline-primary mb-4">Підібрати власний склад у конструкторі</a>
+@section Scripts {
+    <script src="~/js/recommendations.js" asp-append-version="true" defer></script>
+}

@@ -1,0 +1,13 @@
+﻿cake_weight_id,availability,annotation_version,reviewer_ref,verified_at_utc,source_ref
+6,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/6;availability=demo-assumption
+7,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/7;availability=demo-assumption
+8,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/8;availability=demo-assumption
+9,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/9;availability=demo-assumption
+10,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/10;availability=demo-assumption
+11,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/11;availability=demo-assumption
+12,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/12;availability=demo-assumption
+13,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/13;availability=demo-assumption
+14,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/14;availability=demo-assumption
+15,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/15;availability=demo-assumption
+16,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/16;availability=demo-assumption
+17,available,demo-ai-2026-10-21-no-soaking-v2,ai:heuristic-unverified,,backup:CakeWeight/17;availability=demo-assumption

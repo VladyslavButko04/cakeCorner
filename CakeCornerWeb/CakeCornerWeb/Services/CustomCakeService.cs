@@ -22,7 +22,8 @@ public class CustomCakeService(ApplicationDbContext context)
         Validator.ValidateObject(request, new ValidationContext(request), true);
         if (request.Weight != decimal.Round(request.Weight, 1))
             throw new OrderRuleException("Вкажіть вагу з точністю до 0,1 кг.");
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = context.Database.CurrentTransaction == null
+            ? await context.Database.BeginTransactionAsync() : null;
         await SqlServerLocks.AcquireAsync(context, CatalogAvailability.LockResource, shared: true);
         await SqlServerLocks.AcquireAsync(context, $"CakeCorner:Cart:{personId}");
         var choices = new[] { (request.BiscuitId, "Biscuit"), (request.FillingId, "Filling"),
@@ -53,7 +54,7 @@ public class CustomCakeService(ApplicationDbContext context)
         };
         context.CustomCartItems.Add(new CustomCakeCart { CustomCake = cake, Quantity = request.Quantity });
         await context.SaveChangesAsync();
-        await transaction.CommitAsync();
+        if (transaction != null) await transaction.CommitAsync();
     }
 
     public async Task<bool> ChangeAsync(int personId, int itemId, int? quantity)
@@ -68,7 +69,12 @@ public class CustomCakeService(ApplicationDbContext context)
         if (item == null) return false;
         if (quantity != null && !CatalogAvailability.IsAvailable(item.CustomCake))
             throw new OrderRuleException("Один з інгредієнтів більше недоступний. Видаліть конфігурацію та зберіть нову.");
-        if (quantity == null) context.CustomCartItems.Remove(item);
+        if (quantity == null)
+        {
+            context.CustomCartItems.Remove(item);
+            await new CakeCornerWeb.Recommendations.Persistence.RecommendationStore(context).RecordCommerceAsync(personId,
+                "remove_from_cart", CakeCornerWeb.Recommendations.Runtime.CommerceEventKey.For($"remove:custom:{item.CustomCakeCart_ID}"), customCakeId: item.CustomCake_ID);
+        }
         else item.Quantity = quantity.Value;
         await context.SaveChangesAsync();
         await transaction.CommitAsync();

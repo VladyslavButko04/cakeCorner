@@ -86,3 +86,26 @@ a {
 span + span {
     margin-left: 75px;
 }
+
+.catalog-pagination {
+    margin: 1.5rem 0 2rem;
+}
+
+.catalog-pagination .pagination {
+    gap: .35rem;
+}
+
+.catalog-pagination .page-link {
+    border-radius: .4rem;
+    color: #60301a;
+}
+
+.catalog-pagination .page-item.active .page-link {
+    background-color: #60301a;
+    border-color: #60301a;
+    color: #fff;
+}
+
+.catalog-pagination .page-item.disabled .page-link {
+    color: #6c757d;
+}

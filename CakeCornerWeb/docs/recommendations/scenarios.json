@@ -1,0 +1,26 @@
+{
+  "methodVersion": "cakecorner-sugeno-2input-v1",
+  "notice": "Synthetic mathematical checkpoints, not sensory validation. Full C# cases are in CakeCornerWeb.RecommendationTests.",
+  "fitCases": [
+    {
+      "taste": 1,
+      "sweetness": 1,
+      "expected": 1
+    },
+    {
+      "taste": 0.5,
+      "sweetness": 0.5,
+      "expected": 0.45
+    },
+    {
+      "taste": 1,
+      "sweetness": 0,
+      "expected": 0.25
+    },
+    {
+      "taste": 0.75,
+      "sweetness": 0.25,
+      "expected": 0.375
+    }
+  ]
+}

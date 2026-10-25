@@ -1,0 +1,10 @@
+@model IEnumerable<string>
+@if (Model.Any())
+{
+    <ul class="cake-flavor-tags" aria-label="Смаки торта">
+    @foreach (var name in Model.Distinct())
+    {
+        <li>@name</li>
+    }
+    </ul>
+}

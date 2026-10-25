@@ -1,0 +1,66 @@
+@using System.Globalization
+@using CakeCornerWeb.Models.Entities
+@model CakeAdditionalInformationViewModel
+@{
+    var n = Model.Nutrition;
+    string Grams(decimal? value) => value.HasValue ? value.Value.ToString("0.##", CultureInfo.GetCultureInfo("uk-UA")) + " г" : "Не вказано";
+    string Energy(decimal? value, string unit) => value.HasValue ? value.Value.ToString("0.##", CultureInfo.GetCultureInfo("uk-UA")) + " " + unit : "Не вказано";
+}
+<details class="cake-additional-information">
+    <summary>Додаткова інформація</summary>
+    <div class="cake-additional-information__body">
+        <div class="cake-additional-information__columns">
+            <section aria-labelledby="cake-nutrition-heading">
+                <h2 id="cake-nutrition-heading">Поживність на 100 г</h2>
+                @if (n.NutritionStatus == ProductDataStatus.Estimated)
+                {
+                    <p class="cake-information-note">Орієнтовні значення.</p>
+                }
+                @if (n.NutritionStatus == ProductDataStatus.Unknown)
+                {
+                    <p class="cake-information-note">Інформацію про поживність ще не додано.</p>
+                }
+                <table class="cake-nutrition-table">
+                    <caption class="visually-hidden">Поживна цінність 100 г готового торта</caption>
+                    <tbody>
+                        <tr><th scope="row">Білки</th><td>@Grams(n.ProteinGrams)</td></tr>
+                        <tr><th scope="row">Жири</th><td>@Grams(n.FatGrams)</td></tr>
+                        <tr class="cake-nutrition-subrow"><th scope="row">з них насичені</th><td>@Grams(n.SaturatedFatGrams)</td></tr>
+                        <tr><th scope="row">Вуглеводи</th><td>@Grams(n.CarbohydrateGrams)</td></tr>
+                        <tr class="cake-nutrition-subrow"><th scope="row">з них цукри</th><td>@Grams(n.SugarGrams)</td></tr>
+                        <tr><th scope="row">Сіль</th><td>@Grams(n.SaltGrams)</td></tr>
+                        @if (n.FibreGrams.HasValue)
+                        {
+                            <tr><th scope="row">Клітковина</th><td>@Grams(n.FibreGrams)</td></tr>
+                        }
+                    </tbody>
+                </table>
+                <h3 class="cake-energy-heading">Енергетична цінність на 100 г</h3>
+                <p class="cake-energy-value">@Energy(n.EnergyKj, "кДж") / @Energy(n.EnergyKcal, "ккал")</p>
+            </section>
+            <section aria-labelledby="cake-allergens-heading">
+                <h2 id="cake-allergens-heading">Алергени</h2>
+                @if (Model.Contains.Count > 0)
+                {
+                    <p><strong>Містить:</strong> @string.Join(", ", Model.Contains).</p>
+                }
+                @if (Model.MayContain.Count > 0)
+                {
+                    <p><strong>Може містити:</strong> @string.Join(", ", Model.MayContain).</p>
+                }
+                @if (n.AllergenStatus != ProductDataStatus.Verified)
+                {
+                    <p class="cake-information-note">Інформація про алергени уточнюється.</p>
+                }
+                else if (Model.Contains.Count == 0 && Model.MayContain.Count == 0)
+                {
+                    <p>За даними рецептури алергени не зазначені.</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(n.AllergenNotes))
+                {
+                    <p class="cake-allergen-notes">@n.AllergenNotes</p>
+                }
+            </section>
+        </div>
+    </div>
+</details>

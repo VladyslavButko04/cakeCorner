@@ -1,0 +1,99 @@
+{
+  "version": "cakecorner-sugeno-2input-v1",
+  "flavorTags": [
+    "vanilla",
+    "chocolate",
+    "caramel",
+    "coffee",
+    "nut",
+    "berry",
+    "fruit",
+    "citrus",
+    "honey",
+    "coconut",
+    "cheesecake",
+    "spice"
+  ],
+  "allergenCodes": [
+    "gluten",
+    "milk",
+    "egg",
+    "peanut",
+    "tree_nut",
+    "soy",
+    "sesame",
+    "sulphites"
+  ],
+  "slots": [
+    "Biscuit",
+    "Cream",
+    "Filling",
+    "Mousse"
+  ],
+  "aggregationWeights": {
+    "Biscuit": 0.25,
+    "Cream": 0.25,
+    "Filling": 0.25,
+    "Mousse": 0.25
+  },
+  "rules": [
+    {
+      "id": "R01",
+      "taste": "Low",
+      "sweetness": "Low",
+      "consequent": 0
+    },
+    {
+      "id": "R02",
+      "taste": "Low",
+      "sweetness": "Medium",
+      "consequent": 0.1
+    },
+    {
+      "id": "R03",
+      "taste": "Low",
+      "sweetness": "High",
+      "consequent": 0.25
+    },
+    {
+      "id": "R04",
+      "taste": "Medium",
+      "sweetness": "Low",
+      "consequent": 0.1
+    },
+    {
+      "id": "R05",
+      "taste": "Medium",
+      "sweetness": "Medium",
+      "consequent": 0.45
+    },
+    {
+      "id": "R06",
+      "taste": "Medium",
+      "sweetness": "High",
+      "consequent": 0.7
+    },
+    {
+      "id": "R07",
+      "taste": "High",
+      "sweetness": "Low",
+      "consequent": 0.25
+    },
+    {
+      "id": "R08",
+      "taste": "High",
+      "sweetness": "Medium",
+      "consequent": 0.7
+    },
+    {
+      "id": "R09",
+      "taste": "High",
+      "sweetness": "High",
+      "consequent": 1
+    }
+  ],
+  "perSlotCandidates": 8,
+  "beamWidth": 80,
+  "maxCatalogIngredients": 2000,
+  "availabilityTtlHours": 24
+}

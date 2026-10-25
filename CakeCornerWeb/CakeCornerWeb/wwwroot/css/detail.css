@@ -100,6 +100,44 @@
     color: #000000;
 }
 
+.cake-additional-information {
+    margin: 24px 0 40px;
+    border: 1px solid #e0d3c9;
+    border-radius: 16px;
+    background: #fffdf9;
+    color: #4b2e2b;
+    font-family: "Segoe UI", Arial, sans-serif;
+    overflow: hidden;
+}
+
+.cake-additional-information > summary {
+    padding: 20px 24px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cake-additional-information > summary::marker { color: #60301a; }
+.cake-additional-information > summary:focus-visible { outline: 3px solid #a56d4b; outline-offset: -4px; }
+.cake-additional-information[open] > summary { border-bottom: 1px solid #e0d3c9; }
+.cake-additional-information__body { padding: 24px; }
+.cake-additional-information__columns { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; }
+.cake-additional-information h2 { font-size: 1.1rem; margin: 0 0 16px; }
+.cake-additional-information .cake-energy-heading { font-size: 1rem; margin: 24px 0 8px; }
+.cake-nutrition-table { width: 100%; border-collapse: collapse; }
+.cake-nutrition-table th, .cake-nutrition-table td { padding: 10px 0; border-bottom: 1px solid #eee4da; }
+.cake-nutrition-table th { font-weight: 400; text-align: left; }
+.cake-nutrition-table td { text-align: right; white-space: nowrap; padding-left: 16px; }
+.cake-nutrition-subrow th { padding-left: 18px; color: #6e5a51; font-size: .94rem; }
+.cake-information-note { color: #715d53; font-size: .92rem; }
+.cake-energy-value { font-weight: 600; }
+.cake-allergen-notes { white-space: pre-line; overflow-wrap: anywhere; }
+
+@media (max-width: 650px) {
+    .cake-additional-information__columns { grid-template-columns: 1fr; gap: 28px; }
+    .cake-additional-information > summary, .cake-additional-information__body { padding: 18px; }
+}
+
 button[type="submit"] {
     background-color: #60301A;
     color: #fff;

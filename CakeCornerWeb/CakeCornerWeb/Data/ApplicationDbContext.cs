@@ -16,6 +16,7 @@ namespace CakeCornerWeb.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<WeightOption> WeightOptions { get; set; }
         public DbSet<Flavor> Flavors { get; set; }
+        public DbSet<CakeFlavor> CakeFlavors => Set<CakeFlavor>();
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<PersonOrder> Orders => Set<PersonOrder>();
@@ -29,10 +30,14 @@ namespace CakeCornerWeb.Data
         public DbSet<IngredientType> IngredientTypes => Set<IngredientType>();
         public DbSet<CustomCake> CustomCakes => Set<CustomCake>();
         public DbSet<CustomCakeCart> CustomCartItems => Set<CustomCakeCart>();
+        public DbSet<CakeProductInformation> CakeProductInformation => Set<CakeProductInformation>();
+        public DbSet<Allergen> Allergens => Set<Allergen>();
+        public DbSet<CakeAllergen> CakeAllergens => Set<CakeAllergen>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             OrderModelConfiguration.Configure(modelBuilder);
+            CakeInformationConfiguration.Configure(modelBuilder);
 
             // Person
             modelBuilder.Entity<Person>().ToTable("Person").HasKey(c => c.Person_ID);
@@ -60,11 +65,13 @@ namespace CakeCornerWeb.Data
                 .WithMany(cat => cat.Cakes)
                 .HasForeignKey(c => c.Category_ID);
 
-            modelBuilder.Entity<Cake>()
-                .HasOne(c => c.Flavor)
-                .WithMany(f => f.Cakes)
-                .HasForeignKey(c => c.Flavor_ID)
-                .OnDelete(DeleteBehavior.Restrict);
+            var cakeFlavor = modelBuilder.Entity<CakeFlavor>();
+            cakeFlavor.ToTable("CakeFlavor").HasKey(cf => new { cf.Cake_ID, cf.Flavor_ID });
+            cakeFlavor.HasOne(cf => cf.Cake).WithMany(c => c.CakeFlavors)
+                .HasForeignKey(cf => cf.Cake_ID).OnDelete(DeleteBehavior.Cascade);
+            cakeFlavor.HasOne(cf => cf.Flavor).WithMany(f => f.CakeFlavors)
+                .HasForeignKey(cf => cf.Flavor_ID).OnDelete(DeleteBehavior.Restrict);
+            cakeFlavor.HasIndex(cf => cf.Flavor_ID).HasDatabaseName("IX_CakeFlavor_Flavor_ID");
 
             modelBuilder.Entity<CakeWeight>()
                 .HasOne(cw => cw.WeightOption)

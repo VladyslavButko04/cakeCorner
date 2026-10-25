@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using CakeCornerWeb;
 using CakeCornerWeb.Extensions;
 using CakeCornerWeb.Interfaces;
@@ -7,6 +8,25 @@ using Microsoft.EntityFrameworkCore;
 using CakeCornerWeb.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<CakeCornerWeb.Recommendations.Runtime.RecommendationRuntimeOptions>(builder.Configuration.GetSection("Recommendations"));
+var recommendationMethodPath = Path.Combine(builder.Environment.ContentRootPath, "Recommendations", "method.runtime.json");
+var recommendationMethod = File.Exists(recommendationMethodPath)
+    ? System.Text.Json.JsonSerializer.Deserialize<CakeCornerWeb.Recommendations.RecommendationMethod>(File.ReadAllText(recommendationMethodPath), new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web))
+        ?? throw new InvalidOperationException("Invalid recommendation method configuration.")
+    : CakeCornerWeb.Recommendations.Core.RecommendationDefaults.Create();
+CakeCornerWeb.Recommendations.Core.RecommendationEngine.ValidateMethod(recommendationMethod);
+builder.Services.AddSingleton(recommendationMethod);
+builder.Services.AddSingleton<CakeCornerWeb.Recommendations.Core.RecommendationEngine>();
+builder.Services.AddScoped<CakeCornerWeb.Recommendations.Persistence.RecommendationStore>();
+builder.Services.AddScoped<CakeCornerWeb.Recommendations.Runtime.RecommendationService>();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("recommendations", http => System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+        http.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+        { PermitLimit = 120, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
+});
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString) || connectionString == "YOUR_CONNECTION_STRING")
     throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection in local settings or environment variables.");
@@ -70,6 +90,7 @@ app.UseRouting();
 // Аутентификация обязана идти ДО авторизации
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllerRoute(
     name: "default",

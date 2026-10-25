@@ -1,0 +1,41 @@
+@model CakeEditorPage
+<fieldset class="border rounded p-3 p-md-4 mb-4 mt-4">
+    <legend class="float-none w-auto px-2 fs-4">Додаткова інформація</legend>
+    <p class="text-muted">Усі показники вказуються на <strong>100 г готового торта</strong>. Порожнє поле означає, що дані не вказані; нуль означає 0.</p>
+    <div class="row g-3">
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.ProteinGrams" class="form-label"></label><input asp-for="Request.AdditionalInformation.ProteinGrams" type="number" step="0.01" min="0" max="100" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.ProteinGrams" class="text-danger"></span></div>
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.FatGrams" class="form-label"></label><input asp-for="Request.AdditionalInformation.FatGrams" type="number" step="0.01" min="0" max="100" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.FatGrams" class="text-danger"></span></div>
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.SaturatedFatGrams" class="form-label"></label><input asp-for="Request.AdditionalInformation.SaturatedFatGrams" type="number" step="0.01" min="0" max="100" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.SaturatedFatGrams" class="text-danger"></span></div>
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.CarbohydrateGrams" class="form-label"></label><input asp-for="Request.AdditionalInformation.CarbohydrateGrams" type="number" step="0.01" min="0" max="100" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.CarbohydrateGrams" class="text-danger"></span></div>
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.SugarGrams" class="form-label"></label><input asp-for="Request.AdditionalInformation.SugarGrams" type="number" step="0.01" min="0" max="100" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.SugarGrams" class="text-danger"></span></div>
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.SaltGrams" class="form-label"></label><input asp-for="Request.AdditionalInformation.SaltGrams" type="number" step="0.01" min="0" max="100" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.SaltGrams" class="text-danger"></span></div>
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.FibreGrams" class="form-label"></label><input asp-for="Request.AdditionalInformation.FibreGrams" type="number" step="0.01" min="0" max="100" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.FibreGrams" class="text-danger"></span></div>
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.EnergyKcal" class="form-label"></label><input asp-for="Request.AdditionalInformation.EnergyKcal" type="number" step="0.01" min="0" max="950" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.EnergyKcal" class="text-danger"></span></div>
+        <div class="col-sm-6 col-lg-4"><label asp-for="Request.AdditionalInformation.EnergyKj" class="form-label"></label><input asp-for="Request.AdditionalInformation.EnergyKj" type="number" step="0.01" min="0" max="4200" class="form-control" /><span asp-validation-for="Request.AdditionalInformation.EnergyKj" class="text-danger"></span></div>
+    </div>
+    <p class="small text-muted mt-2">Цукри входять до вуглеводів, насичені жири — до загальних жирів. 1 ккал ≈ 4,184 кДж.</p>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><label asp-for="Request.AdditionalInformation.NutritionStatus" class="form-label"></label><select asp-for="Request.AdditionalInformation.NutritionStatus" class="form-select"><option value="Unknown">Не вказано</option><option value="Estimated">Орієнтовні</option><option value="Verified">Підтверджені техкартою</option></select><span asp-validation-for="Request.AdditionalInformation.NutritionStatus" class="text-danger"></span></div>
+        <div class="col-md-8"><label asp-for="Request.AdditionalInformation.NutritionSource" class="form-label"></label><input asp-for="Request.AdditionalInformation.NutritionSource" class="form-control" maxlength="500" /><span asp-validation-for="Request.AdditionalInformation.NutritionSource" class="text-danger"></span></div>
+    </div>
+    <h2 class="h5">Алергени</h2>
+    <p class="small text-muted">Вкажіть конкретні горіхи, якщо вони відомі. «Може містити» обирайте за даними постачальника або виробництва. Для розрахункового складу залиште статус непідтвердженим.</p>
+    <div class="row g-3">
+    @for (var i = 0; i < Model.Request.AdditionalInformation.Allergens.Count; i++)
+    {
+        var allergen = Model.Allergens.First(a => a.Allergen_ID == Model.Request.AdditionalInformation.Allergens[i].AllergenId);
+        <div class="col-sm-6 col-lg-4">
+            <input asp-for="Request.AdditionalInformation.Allergens[i].AllergenId" type="hidden" />
+            <label asp-for="Request.AdditionalInformation.Allergens[i].Presence" class="form-label">@allergen.Name</label>
+            <select asp-for="Request.AdditionalInformation.Allergens[i].Presence" class="form-select">
+                <option value="None">Не зазначено</option><option value="Contains">Містить</option><option value="MayContain">Може містити</option>
+            </select>
+        </div>
+    }
+    </div>
+    <div class="row g-3 mt-2">
+        <div class="col-md-4"><label asp-for="Request.AdditionalInformation.AllergenStatus" class="form-label"></label><select asp-for="Request.AdditionalInformation.AllergenStatus" class="form-select"><option value="Unknown">Не перевірено</option><option value="Estimated">Орієнтовний склад</option><option value="Verified">Перевірено за складом</option></select><span asp-validation-for="Request.AdditionalInformation.AllergenStatus" class="text-danger"></span></div>
+        <div class="col-md-8"><label asp-for="Request.AdditionalInformation.AllergenSource" class="form-label"></label><input asp-for="Request.AdditionalInformation.AllergenSource" class="form-control" maxlength="500" /><span asp-validation-for="Request.AdditionalInformation.AllergenSource" class="text-danger"></span></div>
+        <div class="col-12"><label asp-for="Request.AdditionalInformation.AllergenNotes" class="form-label"></label><textarea asp-for="Request.AdditionalInformation.AllergenNotes" class="form-control" rows="2" maxlength="500"></textarea><span asp-validation-for="Request.AdditionalInformation.AllergenNotes" class="text-danger"></span></div>
+    </div>
+</fieldset>

@@ -1,0 +1,27 @@
+@model CakeCornerWeb.Recommendations.Persistence.RecommendationStorageStatus
+@{ ViewData["Title"] = "Дані рекомендацій"; }
+@await Html.PartialAsync("_AdminNavigation")
+<h1>Дані рекомендацій</h1>
+@if (!Model.Installed)
+{
+    <p class="alert alert-info">Рекомендаційні таблиці ще не налаштовані. Виконайте міграції з інструкції встановлення; звичайний каталог продовжує працювати.</p>
+}
+else
+{
+    <div class="table-responsive"><table class="table"><thead><tr><th>Версія</th><th>Статус</th><th>Інгредієнти</th><th>Торти</th><th>Пари</th></tr></thead><tbody>
+    @foreach (var version in Model.AnnotationVersions)
+    { <tr><td>@version.VersionCode</td><td>@version.Status</td><td>@version.IngredientCount</td><td>@version.ReadyCount</td><td>@version.PairCount</td></tr> }
+    </tbody></table></div>
+    <h2>Імпорт демонстраційної розмітки</h2>
+    <p>Оберіть усі чотири CSV однієї версії. Імпорт перевіряє ID каталогу, типи й діапазони та зберігає джерело оцінок. Використану версію змінювати не можна.</p>
+    <p class="alert alert-warning">Це демонстраційні оцінки. Імпорт не публікує їх і не підтверджує склад, наявність або відсутність алергенів.</p>
+    <form asp-action="Import" method="post" enctype="multipart/form-data" class="col-lg-8">
+        <label for="annotationVersion" class="form-label">Код версії з CSV (поле annotation_version)</label>
+        <input id="annotationVersion" name="annotationVersion" value="demo-ai-2026-10-21-no-soaking-v2" maxlength="80" required class="form-control mb-3" />
+        <label for="ingredients" class="form-label">ingredient-features.csv</label><input id="ingredients" name="ingredients" type="file" accept=".csv" required class="form-control mb-3" />
+        <label for="compatibility" class="form-label">compatibility.csv</label><input id="compatibility" name="compatibility" type="file" accept=".csv" required class="form-control mb-3" />
+        <label for="readyCakes" class="form-label">ready-cake-features.csv</label><input id="readyCakes" name="readyCakes" type="file" accept=".csv" required class="form-control mb-3" />
+        <label for="availability" class="form-label">ready-variant-availability.csv</label><input id="availability" name="availability" type="file" accept=".csv" required class="form-control mb-3" />
+        <button type="submit" class="btn btn-primary">Перевірити й імпортувати</button>
+    </form>
+}

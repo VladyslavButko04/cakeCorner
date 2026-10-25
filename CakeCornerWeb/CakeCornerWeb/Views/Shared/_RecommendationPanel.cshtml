@@ -1,0 +1,116 @@
+@model string
+@{
+    var isCustom = string.Equals(Model, "Custom", StringComparison.Ordinal);
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var flavors = new[] {
+        ("vanilla", "Ваніль"), ("chocolate", "Шоколад"), ("caramel", "Карамель"),
+        ("coffee", "Кава"), ("nut", "Горіхи"), ("berry", "Ягоди"),
+        ("fruit", "Фрукти"), ("citrus", "Цитрус"), ("honey", "Мед"),
+        ("coconut", "Кокос"), ("cheesecake", "Сирно-вершковий"), ("spice", "Прянощі")
+    };
+    var allergens = new[] {
+        ("gluten", "Глютен"), ("milk", "Молоко"), ("egg", "Яйця"), ("peanut", "Арахіс"),
+        ("tree_nut", "Горіхи"), ("soy", "Соя"), ("sesame", "Кунжут"), ("sulphites", "Сульфіти")
+    };
+}
+<section class="recommendation-panel" data-recommendation-panel data-context="@(isCustom ? "Custom" : "Ready")"
+         data-authenticated="@signedIn.ToString().ToLowerInvariant()"
+         data-state-url="@Url.Action("State", "Recommendations")"
+         data-query-url="@Url.Action("Query", "Recommendations")"
+         data-preferences-url="@Url.Action("Preferences", "Recommendations")"
+         data-event-url="@Url.Action("Event", "Recommendations")"
+         data-add-url="@Url.Action("Add", "Recommendations")"
+         data-details-url="@Url.Action("Details", "Cake")"
+         data-login-url="@Url.Action("Login", "Account")"
+         aria-label="Підбір за смаком">
+    <div class="recommendation-heading">
+        <div>
+            <h2>Підберімо за вашим смаком</h2>
+            <p>@(isCustom ? "Оберіть побажання — підкажемо компоненти та варіанти складу. Уже вибрані компоненти збережуться." : "Оберіть смаки й бажану солодкість. Побажання можна змінювати для кожного замовлення.")</p>
+        </div>
+    </div>
+    <p class="recommendation-status" data-rec-status role="status" aria-live="polite">Завантажуємо підбір…</p>
+    <form class="recommendation-controls" data-rec-controls autocomplete="off">
+        @Html.AntiForgeryToken()
+        <fieldset>
+            <legend>Які смаки вам до вподоби?</legend>
+            <div class="recommendation-chips">
+                @foreach (var (code, label) in flavors)
+                {
+                    <label class="recommendation-chip"><input type="checkbox" value="@code" data-rec-flavor /><span>@label</span></label>
+                }
+            </div>
+        </fieldset>
+        <div class="recommendation-inputs">
+            <label>Бажана солодкість
+                <select class="form-select" data-rec-sweetness>
+                    <option value="">Без побажання</option>
+                    <option value="1">Низька — 1 із 5</option>
+                    <option value="2.5">Помірна — 2,5 із 5</option>
+                    <option value="4">Висока — 4 із 5</option>
+                </select>
+            </label>
+            @if (isCustom)
+            {
+                <label>Що підказати?
+                    <select class="form-select" data-rec-target>
+                        <option value="">Варіанти повного складу</option>
+                        <option value="Biscuit">Бісквіт</option>
+                        <option value="Cream">Крем</option>
+                        <option value="Filling">Начинку</option>
+                        <option value="Mousse">Мус</option>
+                    </select>
+                </label>
+            }
+            else
+            {
+                <label>Вага готового торта від, кг<input type="number" class="form-control" min="0.1" step="0.1" data-rec-min-weight placeholder="Не обмежувати" /></label>
+                <label>Вага до, кг<input type="number" class="form-control" min="0.1" step="0.1" data-rec-max-weight placeholder="Не обмежувати" /></label>
+            }
+            <label>Дані для підбору
+                <select class="form-select" data-rec-data-mode>
+                    <option value="Demo">Демонстраційні оцінки</option>
+                    <option value="Verified">Лише перевірені дані</option>
+                </select>
+            </label>
+        </div>
+        <p class="recommendation-demo" data-rec-demo>Демонстраційний підбір: оцінки смаку й поєднань попередні; наявність на бажану дату підтвердить кондитерська.</p>
+        <details class="recommendation-restrictions">
+            <summary>Виключити алергени</summary>
+            <p>Для цих обмежень потрібен перевірений склад. Якщо відомостей недостатньо, ми не пропонуватимемо варіант.</p>
+            <div class="recommendation-chips">
+                @foreach (var (code, label) in allergens)
+                {
+                    <label class="recommendation-chip"><input type="checkbox" value="@code" data-rec-allergen /><span>@label</span></label>
+                }
+            </div>
+        </details>
+        @if (isCustom)
+        {
+            <details class="recommendation-restrictions">
+                <summary>Не включати певні інгредієнти</summary>
+                <p>Виключення діють лише для цього підбору. Уже вибраний компонент потрібно спочатку замінити або вибрати його тип у полі «Що підказати?».</p>
+                <fieldset>
+                    <legend class="visually-hidden">Інгредієнти, які потрібно виключити</legend>
+                    <div class="recommendation-chips recommendation-exclusions" data-rec-excluded-list></div>
+                </fieldset>
+            </details>
+        }
+        <div class="recommendation-actions">
+            <button class="btn btn-primary" type="button" data-rec-refresh>Підібрати</button>
+            <button class="btn btn-outline-secondary" type="button" data-rec-reset>Скинути побажання</button>
+            @if (signedIn)
+            {
+                <button class="btn btn-outline-primary" type="button" data-rec-save>Зберегти вподобання</button>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="recommendation-login">Увійдіть, щоб зберегти вподобання</a>
+            }
+        </div>
+        <p class="recommendation-save-status" data-rec-save-status role="status" aria-live="polite"></p>
+    </form>
+    <div class="recommendation-warnings" data-rec-warnings></div>
+    <div class="recommendation-results" data-rec-results aria-live="polite" aria-busy="false"></div>
+    <noscript><p>Для підбору за вподобаннями увімкніть JavaScript. Ви можете обрати торт у звичайному каталозі.</p></noscript>
+</section>

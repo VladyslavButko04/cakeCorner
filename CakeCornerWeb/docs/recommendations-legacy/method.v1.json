@@ -1,0 +1,376 @@
+{
+  "version": "cakecorner-hybrid-v0.2-no-soaking",
+  "status": "research-draft-not-runtime",
+  "repositoryBase": "dffd81ddc6c79dc63ac51bb9226859ae31c1a53b",
+  "flavorTags": [
+    "vanilla",
+    "chocolate",
+    "caramel",
+    "coffee",
+    "nut",
+    "berry",
+    "fruit",
+    "citrus",
+    "honey",
+    "coconut",
+    "cheesecake",
+    "spice"
+  ],
+  "allergenCodes": [
+    "gluten",
+    "milk",
+    "egg",
+    "peanut",
+    "tree_nut",
+    "soy",
+    "sesame",
+    "sulphites"
+  ],
+  "allergenVocabularyNote": "Pilot vocabulary, not an exhaustive legal or medical classification; unknown codes require review.",
+  "slots": {
+    "Biscuit": "Biscuit_ID",
+    "Cream": "Cream_ID",
+    "Filling": "Filling_ID",
+    "Mousse": "MousseCheeseCake_ID"
+  },
+  "sources": {
+    "ingredient": "CakeCornerWeb/CakeCornerWeb/Models/Entities/CustomCakeModel.cs",
+    "ready": "CakeCornerWeb/CakeCornerWeb/Models/Entities/CakeWeight.cs",
+    "customPricing": "CakeCornerWeb/CakeCornerWeb/Services/CustomCakeService.cs",
+    "constraints": "CakeCornerWeb/CakeCornerWeb/Models/ViewModels/OrderViewModel.cs",
+    "quantity": "CakeCornerWeb/CakeCornerWeb/Models/CartOperationResult.cs",
+    "orders": "CakeCornerWeb/CakeCornerWeb/Services/OrderService.cs"
+  },
+  "scales": {
+    "sweetness": [
+      0,
+      5
+    ],
+    "flavorIntensity": [
+      0,
+      1
+    ],
+    "userFlavorWeight": [
+      0,
+      5
+    ],
+    "fit": [
+      0,
+      1
+    ]
+  },
+  "limits": {
+    "customWeightKg": [
+      0.5,
+      10
+    ],
+    "weightStepKg": 0.1,
+    "quantity": [
+      1,
+      99
+    ],
+    "guestCount": [
+      1,
+      50
+    ],
+    "maxMoneyUah": "99999999.99",
+    "shapes": [
+      "Round",
+      "Square",
+      "Heart"
+    ]
+  },
+  "pricing": {
+    "currency": "UAH",
+    "budgetScope": "selection_unit_price_times_quantity",
+    "rounding": "AwayFromZero",
+    "decimalPlaces": 2
+  },
+  "aggregation": {
+    "status": "hypothesis-needs-sensory-validation",
+    "weights": {
+      "Biscuit": 0.25,
+      "Cream": 0.25,
+      "Filling": 0.25,
+      "Mousse": 0.25
+    }
+  },
+  "budget": {
+    "modes": [
+      "strict",
+      "target",
+      "none"
+    ],
+    "targetOverrunAtZeroFit": 0.25
+  },
+  "fuzzy": {
+    "type": "SugenoZeroOrder",
+    "inputs": [
+      "taste",
+      "sweetness",
+      "budget"
+    ],
+    "levels": [
+      "Low",
+      "Medium",
+      "High"
+    ],
+    "membership": "low=max(0,1-2z); medium=1-abs(2z-1); high=max(0,2z-1)",
+    "and": "product",
+    "ruleWeight": 1,
+    "alpha": 0.5,
+    "epsilon": 1e-09,
+    "rules": [
+      {
+        "id": "R01",
+        "taste": "Low",
+        "sweetness": "Low",
+        "budget": "Low",
+        "consequent": 0
+      },
+      {
+        "id": "R02",
+        "taste": "Low",
+        "sweetness": "Medium",
+        "budget": "Low",
+        "consequent": 0.05
+      },
+      {
+        "id": "R03",
+        "taste": "Low",
+        "sweetness": "High",
+        "budget": "Low",
+        "consequent": 0.1
+      },
+      {
+        "id": "R04",
+        "taste": "Low",
+        "sweetness": "Low",
+        "budget": "Medium",
+        "consequent": 0.05
+      },
+      {
+        "id": "R05",
+        "taste": "Low",
+        "sweetness": "Medium",
+        "budget": "Medium",
+        "consequent": 0.1
+      },
+      {
+        "id": "R06",
+        "taste": "Low",
+        "sweetness": "High",
+        "budget": "Medium",
+        "consequent": 0.15
+      },
+      {
+        "id": "R07",
+        "taste": "Low",
+        "sweetness": "Low",
+        "budget": "High",
+        "consequent": 0.1
+      },
+      {
+        "id": "R08",
+        "taste": "Low",
+        "sweetness": "Medium",
+        "budget": "High",
+        "consequent": 0.15
+      },
+      {
+        "id": "R09",
+        "taste": "Low",
+        "sweetness": "High",
+        "budget": "High",
+        "consequent": 0.25
+      },
+      {
+        "id": "R10",
+        "taste": "Medium",
+        "sweetness": "Low",
+        "budget": "Low",
+        "consequent": 0.1
+      },
+      {
+        "id": "R11",
+        "taste": "Medium",
+        "sweetness": "Medium",
+        "budget": "Low",
+        "consequent": 0.2
+      },
+      {
+        "id": "R12",
+        "taste": "Medium",
+        "sweetness": "High",
+        "budget": "Low",
+        "consequent": 0.3
+      },
+      {
+        "id": "R13",
+        "taste": "Medium",
+        "sweetness": "Low",
+        "budget": "Medium",
+        "consequent": 0.2
+      },
+      {
+        "id": "R14",
+        "taste": "Medium",
+        "sweetness": "Medium",
+        "budget": "Medium",
+        "consequent": 0.4
+      },
+      {
+        "id": "R15",
+        "taste": "Medium",
+        "sweetness": "High",
+        "budget": "Medium",
+        "consequent": 0.5
+      },
+      {
+        "id": "R16",
+        "taste": "Medium",
+        "sweetness": "Low",
+        "budget": "High",
+        "consequent": 0.3
+      },
+      {
+        "id": "R17",
+        "taste": "Medium",
+        "sweetness": "Medium",
+        "budget": "High",
+        "consequent": 0.5
+      },
+      {
+        "id": "R18",
+        "taste": "Medium",
+        "sweetness": "High",
+        "budget": "High",
+        "consequent": 0.65
+      },
+      {
+        "id": "R19",
+        "taste": "High",
+        "sweetness": "Low",
+        "budget": "Low",
+        "consequent": 0.2
+      },
+      {
+        "id": "R20",
+        "taste": "High",
+        "sweetness": "Medium",
+        "budget": "Low",
+        "consequent": 0.35
+      },
+      {
+        "id": "R21",
+        "taste": "High",
+        "sweetness": "High",
+        "budget": "Low",
+        "consequent": 0.45
+      },
+      {
+        "id": "R22",
+        "taste": "High",
+        "sweetness": "Low",
+        "budget": "Medium",
+        "consequent": 0.35
+      },
+      {
+        "id": "R23",
+        "taste": "High",
+        "sweetness": "Medium",
+        "budget": "Medium",
+        "consequent": 0.65
+      },
+      {
+        "id": "R24",
+        "taste": "High",
+        "sweetness": "High",
+        "budget": "Medium",
+        "consequent": 0.8
+      },
+      {
+        "id": "R25",
+        "taste": "High",
+        "sweetness": "Low",
+        "budget": "High",
+        "consequent": 0.45
+      },
+      {
+        "id": "R26",
+        "taste": "High",
+        "sweetness": "Medium",
+        "budget": "High",
+        "consequent": 0.8
+      },
+      {
+        "id": "R27",
+        "taste": "High",
+        "sweetness": "High",
+        "budget": "High",
+        "consequent": 1
+      }
+    ]
+  },
+  "partialProfile": "arithmetic_mean_of_request_active_fits_no_imputation",
+  "fallback": {
+    "strategy": "popular-fallback",
+    "lookbackDays": 180,
+    "orderStatus": "Completed",
+    "signal": "distinct_orders_before_cutoff",
+    "zeroCountTieBreak": "candidateKey_ordinal"
+  },
+  "generation": {
+    "slotOrder": [
+      "Biscuit",
+      "Cream",
+      "Filling",
+      "Mousse"
+    ],
+    "perSlotCandidates": 5,
+    "beamWidth": 20,
+    "topK": 5,
+    "mmrEnabled": false,
+    "requireAllCrossTypePairsAllowed": true,
+    "fullConfigurationPairCount": 6
+  },
+  "missingData": {
+    "availability": "exclude_unknown",
+    "compatibility": "exclude_unknown",
+    "allergensWhenRestricted": "exclude_unknown",
+    "activeSensoryFeatures": "exclude_unknown",
+    "allergensWhenUnrestricted": "not_used_as_fit"
+  },
+  "evaluation": {
+    "primaryMetric": "NDCG@5",
+    "relevanceScale": [
+      0,
+      3
+    ],
+    "relevantThreshold": 2,
+    "alphaGrid": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "budgetOverrunGrid": [
+      0.1,
+      0.25,
+      0.5
+    ],
+    "beamWidthGrid": [
+      10,
+      20,
+      50
+    ],
+    "perSlotGrid": [
+      3,
+      5,
+      10
+    ],
+    "testTuningAllowed": false
+  },
+  "requiredApplicationUpdate": "Database/009_RemoveSoaking.sql and the accompanying main source update"
+}

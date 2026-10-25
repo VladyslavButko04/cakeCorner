@@ -1,0 +1,21 @@
+{
+  "methodVersion": "cakecorner-hybrid-v0.2-no-soaking",
+  "mode": "both",
+  "preferredFlavors": {
+    "berry": 5,
+    "vanilla": 2
+  },
+  "desiredSweetness": 2.0,
+  "budgetMode": "strict",
+  "budgetUah": 1500.0,
+  "quantity": 1,
+  "customWeightKg": 2.0,
+  "guestCount": 10,
+  "shape": "Round",
+  "readyMinWeightKg": 1.5,
+  "readyMaxWeightKg": 2.5,
+  "lockedIngredients": {},
+  "excludedIngredientIds": [],
+  "excludedAllergens": [],
+  "topK": 5
+}

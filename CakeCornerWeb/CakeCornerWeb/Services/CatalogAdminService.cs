@@ -13,6 +13,8 @@ public sealed class CatalogAdminService(ApplicationDbContext context, CatalogIma
     public async Task<int> SaveCakeAsync(int? id, CakeEditorRequest request, CancellationToken ct = default)
     {
         Validator.ValidateObject(request, new ValidationContext(request), true);
+        if (request.FlavorIds.Any(id => id <= 0) || request.FlavorIds.Distinct().Count() != request.FlavorIds.Count)
+            throw new CatalogRuleException("Оберіть наявні смаки без повторів.");
         if (request.Variants == null || request.Variants.Count > 100)
             throw new CatalogRuleException("Перевірте список вагових варіантів.");
         var selected = request.Variants.Where(v => v.Enabled).ToList();
@@ -20,17 +22,20 @@ public sealed class CatalogAdminService(ApplicationDbContext context, CatalogIma
             throw new CatalogRuleException("Оберіть хоча б один ваговий варіант без повторів.");
         if (selected.Any(v => !v.Price.HasValue || v.Price.Value <= 0 || v.Price.Value > 99999999.99m || decimal.Round(v.Price.Value, 2) != v.Price.Value))
             throw new CatalogRuleException("Ціна кожної обраної ваги має бути додатною, з точністю до копійок.");
+        await CakeInformationEditor.ValidateAsync(context, request.AdditionalInformation, ct);
         await using var transaction = await context.Database.BeginTransactionAsync(ct);
         await SqlServerLocks.AcquireAsync(context, CatalogAvailability.LockResource);
         var cake = id == null ? new Cake() : await context.Cakes.Include(c => c.CakeWeights)
+            .Include(c => c.CakeFlavors)
+            .Include(c => c.ProductInformation).Include(c => c.Allergens).ThenInclude(a => a.Allergen)
             .SingleOrDefaultAsync(c => c.Cake_ID == id, ct)
             ?? throw new CatalogRuleException("Торт більше не існує. Оновіть список.");
         if (id != null) CheckVersion(cake.RowVersion, request.RowVersion);
         if (id != null && !cake.IsActive)
             throw new CatalogRuleException("Спочатку відновіть торт з архіву.");
         if (!await context.Categories.AnyAsync(c => c.Category_ID == request.CategoryId, ct) ||
-            !await context.Flavors.AnyAsync(f => f.Flavor_ID == request.FlavorId, ct))
-            throw new CatalogRuleException("Оберіть наявну категорію та смак.");
+            await context.Flavors.CountAsync(f => request.FlavorIds.Contains(f.Flavor_ID), ct) != request.FlavorIds.Count)
+            throw new CatalogRuleException("Оберіть наявну категорію та смаки. Якщо довідник змінився, оновіть сторінку.");
         var weightIds = selected.Select(v => v.WeightOptionId).ToArray();
         if (await context.WeightOptions.CountAsync(w => weightIds.Contains(w.WeightOption_ID) && w.Weight > 0, ct) != selected.Count)
             throw new CatalogRuleException("Один з вагових варіантів більше не існує.");
@@ -43,9 +48,14 @@ public sealed class CatalogAdminService(ApplicationDbContext context, CatalogIma
             if (request.Image != null) uploaded = await images.SaveAsync(request.Image, null, ct);
             cake.CakeName = request.Name.Trim();
             cake.Category_ID = request.CategoryId;
-            cake.Flavor_ID = request.FlavorId;
+            var remainingFlavors = request.FlavorIds.ToHashSet();
+            foreach (var existing in cake.CakeFlavors.ToArray())
+                if (!remainingFlavors.Remove(existing.Flavor_ID)) cake.CakeFlavors.Remove(existing);
+            foreach (var flavorId in remainingFlavors)
+                cake.CakeFlavors.Add(new CakeFlavor { Cake = cake, Flavor_ID = flavorId });
             cake.DescriptionShort = request.ShortDescription.Trim();
             cake.DescriptionLong = request.Description.Trim();
+            CakeInformationEditor.Apply(cake, request.AdditionalInformation);
             if (uploaded != null) cake.ImagePath = uploaded;
             if (id == null)
             {

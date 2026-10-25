@@ -206,6 +206,16 @@ public class OrderService(ApplicationDbContext context)
         order.Status = next;
         order.UpdatedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
+        if (request.StatusCode == OrderWorkflow.Completed)
+        {
+            var telemetry = new CakeCornerWeb.Recommendations.Persistence.RecommendationStore(context);
+            var readyProducts = await context.OrderItems.AsNoTracking().Where(i => i.Order_ID == orderId).Select(i => i.CakeWeight_ID).Distinct().ToListAsync();
+            var customProducts = await context.CustomCartItems.AsNoTracking().Where(i => i.Order_ID == orderId).Select(i => i.CustomCake_ID).Distinct().ToListAsync();
+            foreach (var variant in readyProducts)
+                await telemetry.RecordCommerceAsync(order.Person_ID, "order_completed", CakeCornerWeb.Recommendations.Runtime.CommerceEventKey.For($"completed:{orderId}:ready:{variant}"), cakeWeightId: variant, orderId: orderId);
+            foreach (var cake in customProducts)
+                await telemetry.RecordCommerceAsync(order.Person_ID, "order_completed", CakeCornerWeb.Recommendations.Runtime.CommerceEventKey.For($"completed:{orderId}:custom:{cake}"), customCakeId: cake, orderId: orderId);
+        }
         await transaction.CommitAsync();
         return true;
     }
